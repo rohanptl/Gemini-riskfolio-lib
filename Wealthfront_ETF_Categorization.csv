@@ -1,0 +1,195 @@
+Ticker,ETF_Name,Asset_Class,Category
+ANGL,VanEck Fallen Angel High Yield Bond ETF,Fixed Income & Cash,High Yield Bonds
+ARKF,ARK Blockchain & Fintech Innovation ETF,Thematic Equity,Fintech / Blockchain Equity
+ARKG,ARK Genomic Revolution ETF,Thematic Equity,Genomics
+ARKK,ARK Innovation ETF,Thematic Equity,Innovation
+ARKQ,ARK Autonomous Technology & Robotics ETF,Thematic Equity,Autonomous Technology & Robotics
+ARKW,ARK Next Generation Internet ETF,Thematic Equity,Next Generation Internet
+AVDE,Avantis International Equity ETF,International Equity,Developed Markets
+AVDV,Avantis International Small Cap Value ETF,International Equity,International Small Cap Value
+AVEM,Avantis Emerging Markets Equity ETF,International Equity,Emerging Markets
+AVUS,Avantis US Equity ETF,US Equity,US Broad Market
+AVUV,Avantis U.S. Small Cap Value ETF,US Equity,US Small Cap Value
+BBCA,JPMorgan BetaBuilders Canada ETF,International Equity,Single Country: Canada
+BBJP,JPMorgan BetaBuilders Japan ETF,International Equity,Single Country: Japan
+BIL,State Street SPDR Bloomberg 1-3 Month T-Bill ETF,Fixed Income & Cash,T-Bills / Cash Equivalent
+BKLN,Invesco Senior Loan ETF,Fixed Income & Cash,Senior Loans
+BLOK,Amplify Blockchain Technology ETF,Thematic Equity,Blockchain Equity
+BLV,Vanguard Long-Term Bond ETF,Fixed Income & Cash,Long-Term Bonds
+BND,Vanguard Total Bond Market ETF,Fixed Income & Cash,Core Bonds
+BNDX,Vanguard Total International Bond ETF,Fixed Income & Cash,International Bonds
+BOTZ,Global X Robotics & Artificial Intelligence ETF,Thematic Equity,Robotics & Artificial Intelligence
+BSV,Vanguard Short-Term Bond ETF,Fixed Income & Cash,Short-Term Bonds
+CIBR,First Trust NASDAQ Cybersecurity ETF,Thematic Equity,Cybersecurity
+CMF,iShares California Muni Bond ETF,Fixed Income & Cash,California Muni Bonds
+DIA,State Street SPDR Dow Jones Industrial Average ETF Trust,US Equity,Dow Jones / Large Cap
+DIV,Global X SuperDividend US ETF,US Equity,US High Dividend
+DIVO,Amplify CWP Enhanced Dividend Income ETF,US Equity,US Equity Premium Income
+DSI,iShares ESG MSCI KLD 400 ETF,US Equity,US ESG Large Cap
+DVYE,iShares Emerging Markets Dividend ETF,International Equity,Emerging Markets Dividend
+EAGG,iShares ESG Aware U.S. Aggregate Bond ETF,Fixed Income & Cash,ESG Aggregate Bonds
+EBND,SPDR Bloomberg Emerging Markets Local Bond ETF,Fixed Income & Cash,Emerging Markets Local Bonds
+ECH,iShares MSCI Chile ETF,International Equity,Single Country: Chile
+EEMV,iShares MSCI Emerging Markets Min Vol Factor ETF,Defensive Equity,Emerging Markets Minimum Volatility
+EFAV,iShares MSCI EAFE Min Vol Factor ETF,Defensive Equity,International Minimum Volatility
+EFG,iShares MSCI EAFE Growth ETF,International Equity,EAFE Growth
+EFV,iShares MSCI EAFE Value ETF,International Equity,EAFE Value
+EIDO,iShares MSCI Indonesia ETF,International Equity,Single Country: Indonesia
+EIS,iShares MSCI Israel ETF,International Equity,Single Country: Israel
+EMXC,iShares MSCI Emerging Markets ex China ETF,International Equity,Emerging Markets ex China
+EPOL,iShares MSCI Poland ETF,International Equity,Single Country: Poland
+ESGD,iShares ESG Aware MSCI EAFE ETF,International Equity,Developed Markets ESG
+ESGE,iShares ESG Aware MSCI EM ETF,International Equity,Emerging Markets ESG
+ESGU,iShares ESG Aware MSCI USA ETF,US Equity,US ESG Large Cap
+ETHA,iShares Ethereum Trust ETF,Cryptocurrency,Ethereum
+EWA,iShares MSCI Australia ETF,International Equity,Single Country: Australia
+EWD,iShares MSCI Sweden ETF,International Equity,Single Country: Sweden
+EWG,iShares MSCI Germany ETF,International Equity,Single Country: Germany
+EWH,iShares MSCI Hong Kong ETF,International Equity,Single Country: Hong Kong
+EWI,iShares MSCI Italy ETF,International Equity,Single Country: Italy
+EWL,iShares MSCI Switzerland ETF,International Equity,Single Country: Switzerland
+EWM,iShares MSCI Malaysia ETF,International Equity,Single Country: Malaysia
+EWN,iShares MSCI Netherlands ETF,International Equity,Single Country: Netherlands
+EWP,iShares MSCI Spain ETF,International Equity,Single Country: Spain
+EWQ,iShares MSCI France ETF,International Equity,Single Country: France
+EWS,iShares MSCI Singapore ETF,International Equity,Single Country: Singapore
+EWT,iShares MSCI Taiwan ETF,International Equity,Single Country: Taiwan
+EWU,iShares MSCI United Kingdom ETF,International Equity,Single Country: United Kingdom
+EWW,iShares MSCI Mexico ETF,International Equity,Single Country: Mexico
+EWY,iShares MSCI South Korea ETF,International Equity,Single Country: South Korea
+EZA,iShares MSCI South Africa ETF,International Equity,Single Country: South Africa
+FDN,First Trust Dow Jones Internet Index Fund,Thematic Equity,Internet
+FEZ,State Street SPDR EURO STOXX 50 ETF,International Equity,Eurozone Large Cap
+FLRN,State Street SPDR Bloomberg Investment Grade Floating Rate ETF,Fixed Income & Cash,Investment Grade Floating Rate Bonds
+FNDA,Schwab Fundamental U.S. Small Company ETF,US Equity,US Small Company Fundamental
+FNDC,Schwab Fundamental International Small Equity ETF,International Equity,International Small Equity
+FNDE,Schwab Fundamental Emerging Markets Equity ETF,International Equity,Emerging Markets Fundamental
+FNDF,Schwab Fundamental International Equity ETF,International Equity,International Equity Fundamental
+FTCS,First Trust Capital Strength ETF,US Equity,Capital Strength
+GDX,VanEck Gold Miners ETF/USA,Commodities & Hard Assets,Gold Miners
+GDXJ,VanEck Junior Gold Miners ETF,Commodities & Hard Assets,Junior Gold Miners
+GLDM,SPDR Gold MiniShares Trust,Commodities & Hard Assets,Gold Bullion
+GNR,State Street SPDR S&P Global Natural Resources ETF,Commodities & Hard Assets,Global Natural Resources
+GOVT,iShares U.S. Treasury Bond ETF,Fixed Income & Cash,Treasury Bonds
+GSIE,Goldman Sachs ActiveBeta International Equity ETF,International Equity,International Equity
+GSLC,Goldman Sachs ActiveBeta U.S. Large Cap Equity ETF,US Equity,US Large Cap
+HEFA,iShares Currency Hedged MSCI EAFE ETF,International Equity,Currency Hedged EAFE
+HYD,VanEck High Yield Muni ETF,Fixed Income & Cash,High Yield Muni Bonds
+IBB,iShares Biotechnology ETF,US Equity,Biotechnology
+IBIT,iShares Bitcoin Trust ETF,Cryptocurrency,Bitcoin
+ICLN,iShares Global Clean Energy ETF,Thematic Equity,Clean Energy
+ICVT,iShares Convertible Bond ETF,Fixed Income & Cash,Convertible Bonds
+IGV,iShares Expanded Tech-Software Sector ETF,Thematic Equity,Software
+IHI,iShares U.S. Medical Devices ETF,US Equity,Medical Devices
+INDA,iShares MSCI India ETF,International Equity,Single Country: India
+IXC,iShares Global Energy ETF,Commodities & Hard Assets,Global Energy
+IXN,iShares Global Tech ETF,Thematic Equity,Global Technology
+JEPI,JPMorgan Equity Premium Income ETF,US Equity,US Equity Premium Income
+JEPQ,JPMorgan Nasdaq Equity Premium Income ETF,US Equity,Nasdaq Equity Premium Income
+JETS,US Global Jets ETF,US Equity,Airlines
+JMOM,JPMorgan US Momentum Factor ETF,US Equity,Momentum
+JPST,JPMorgan Ultra-Short Income ETF,Fixed Income & Cash,Ultra-Short Income / Cash Equivalent
+JQUA,JPMorgan US Quality Factor ETF,US Equity,Quality
+KBE,State Street SPDR S&P Bank ETF,US Equity,Banks
+KCE,State Street SPDR S&P Capital Markets ETF,US Equity,Capital Markets
+KIE,State Street SPDR S&P Insurance ETF,US Equity,Insurance
+KOMP,State Street SPDR S&P Kensho New Economies Composite ETF,Thematic Equity,New Economy / Innovation
+KSA,iShares MSCI Saudi Arabia ETF,International Equity,Single Country: Saudi Arabia
+LIT,Global X Lithium & Battery Tech ETF,Thematic Equity,Lithium & Battery Technology
+LQD,iShares iBoxx USD Investment Grade Corporate Bond ETF,Fixed Income & Cash,Investment Grade Corporate Bonds
+MCHI,iShares MSCI China ETF,International Equity,Single Country: China
+MGC,Vanguard Mega Cap ETF,US Equity,Mega Cap
+MLPA,Global X MLP ETF,Commodities & Hard Assets,MLP / Energy Infrastructure
+MOAT,VanEck Morningstar Wide Moat ETF,US Equity,Wide Moat
+NYF,iShares New York Muni Bond ETF,Fixed Income & Cash,New York Muni Bonds
+OIH,VanEck Oil Services ETF,Commodities & Hard Assets,Energy Services
+PAVE,Global X US Infrastructure Development ETF,US Equity,Infrastructure
+PBW,Invesco WilderHill Clean Energy ETF,Thematic Equity,Clean Energy
+PFFD,Global X US Preferred ETF,Fixed Income & Cash,Preferred Equity
+PHO,Invesco Water Resources ETF,Thematic Equity,Water Resources
+PICK,iShares MSCI Global Metals & Mining Producers ETF,Commodities & Hard Assets,Metals & Mining Producers
+PKW,Invesco BuyBack Achievers ETF,US Equity,Buyback Achievers
+PULS,PGIM Ultra Short Bond ETF,Fixed Income & Cash,Ultra-Short Income / Cash Equivalent
+QCLN,First Trust NASDAQ Clean Edge Green Energy Index Fund,Thematic Equity,Clean Energy
+QQQJ,Invesco Nasdaq Next Gen 100 ETF,US Equity,Nasdaq Next Gen 100
+QQQM,Invesco Nasdaq 100 ETF,US Equity,Nasdaq 100
+QTEC,First Trust NASDAQ-100 Technology Index Fund,US Equity,Nasdaq Technology
+QYLD,Global X Nasdaq 100 Covered Call ETF,US Equity,Nasdaq Covered Call
+REM,iShares Mortgage Real Estate ETF,Real Estate,Mortgage REITs
+RSP,Invesco S&P 500 Equal Weight ETF,US Equity,S&P 500 Equal Weight
+RYLD,Global X Russell 2000 Covered Call ETF,US Equity,Russell 2000 Covered Call
+SCHA,Schwab US Small-Cap ETF,US Equity,US Small Cap
+SCHO,Schwab Short-Term US Treasury ETF,Fixed Income & Cash,Short-Term Treasury Bonds
+SCHP,Schwab US TIPS ETF,Fixed Income & Cash,TIPS
+SCZ,iShares MSCI EAFE Small-Cap ETF,International Equity,EAFE Small Cap
+SDIV,Global X SuperDividend ETF,US Equity,Global High Dividend
+SGOV,iShares 0-3 Month Treasury Bond ETF,Fixed Income & Cash,T-Bills / Cash Equivalent
+SHV,iShares 0-1 Year Treasury Bond ETF,Fixed Income & Cash,T-Bills / Cash Equivalent
+SHYG,iShares 0-5 Year High Yield Corporate Bond ETF,Fixed Income & Cash,Short-Term High Yield Bonds
+SLV,iShares Silver Trust,Commodities & Hard Assets,Silver Bullion
+SLVP,iShares MSCI Global Silver and Metals Miners ETF,Commodities & Hard Assets,Silver Miners
+SMH,VanEck Semiconductor ETF,US Equity,Semiconductors
+SMIN,iShares MSCI India Small-Cap ETF,International Equity,Single Country: India Small Cap
+SPY,State Street SPDR S&P 500 ETF Trust,US Equity,S&P 500
+SPYD,State Street SPDR Portfolio S&P 500 High Dividend ETF,US Equity,S&P 500 High Dividend
+SPYX,State Street SPDR S&P 500 Fossil Fuel Reserves Free ETF,US Equity,S&P 500 Fossil Fuel Reserves Free
+SUB,iShares Short-Term National Muni Bond ETF,Fixed Income & Cash,Short-Term National Muni Bonds
+SUSB,iShares ESG Aware 1-5 Year USD Corporate Bond ETF,Fixed Income & Cash,Short-Term Corporate Bonds ESG
+SUSC,iShares ESG Aware USD Corporate Bond ETF,Fixed Income & Cash,Corporate Bonds ESG
+TAN,Invesco Solar ETF,Thematic Equity,Solar Energy
+TDIV,First Trust NASDAQ Technology Dividend Index Fund,US Equity,Technology Dividend
+THD,iShares MSCI Thailand ETF,International Equity,Single Country: Thailand
+TMFC,Motley Fool 100 Index ETF,US Equity,Motley Fool 100
+TUR,iShares MSCI Turkey ETF,International Equity,Single Country: Turkey
+UAE,iShares MSCI UAE ETF,International Equity,Single Country: UAE
+URA,Global X Uranium ETF,Commodities & Hard Assets,Uranium
+USFR,WisdomTree Floating Rate Treasury Fund,Fixed Income & Cash,Floating Rate Treasury / Cash Equivalent
+USHY,iShares Broad USD High Yield Corporate Bond ETF,Fixed Income & Cash,High Yield Bonds
+USMV,iShares MSCI USA Min Vol Factor ETF,Defensive Equity,Minimum Volatility
+VBK,Vanguard Small-Cap Growth ETF,US Equity,Small Cap Growth
+VBR,Vanguard Small-Cap Value ETF,US Equity,Small Cap Value
+VCLT,Vanguard Long-Term Corporate Bond ETF,Fixed Income & Cash,Long-Term Corporate Bonds
+VCSH,Vanguard Short-Term Corporate Bond ETF,Fixed Income & Cash,Short-Term Corporate Bonds
+VEA,Vanguard FTSE Developed Markets ETF,International Equity,Developed Markets
+VGIT,Vanguard Intermediate-Term Treasury ETF,Fixed Income & Cash,Intermediate Treasury Bonds
+VGK,Vanguard FTSE Europe ETF,International Equity,Europe
+VGLT,Vanguard Long-Term Treasury ETF,Fixed Income & Cash,Long-Term Treasury Bonds
+VIG,Vanguard Dividend Appreciation ETF,US Equity,Dividend Growth
+VIGI,Vanguard International Dividend Appreciation ETF,International Equity,International Dividend Growth
+VMBS,Vanguard Mortgage-Backed Securities ETF,Fixed Income & Cash,Mortgage-Backed Bonds
+VNQ,Vanguard Real Estate ETF,Real Estate,US Real Estate
+VNQI,Vanguard Global ex-U.S. Real Estate ETF,Real Estate,International Real Estate
+VO,Vanguard Mid-Cap ETF,US Equity,Mid Cap
+VOE,Vanguard Mid-Cap Value ETF,US Equity,Mid Cap Value
+VOT,Vanguard Mid-Cap Growth ETF,US Equity,Mid Cap Growth
+VPL,Vanguard FTSE Pacific ETF,International Equity,Pacific
+VSGX,Vanguard ESG International Stock ETF,International Equity,International ESG
+VT,Vanguard Total World Stock ETF,International Equity,Global Equity
+VTEB,Vanguard Tax-Exempt Bond Index ETF,Fixed Income & Cash,Tax-Exempt Muni Bonds
+VTI,Vanguard Total Stock Market ETF,US Equity,Total US Stock Market
+VTV,Vanguard Value ETF,US Equity,Value
+VUG,Vanguard Growth ETF,US Equity,Growth
+VWO,Vanguard FTSE Emerging Markets ETF,International Equity,Emerging Markets
+VWOB,Vanguard Emerging Markets Government Bond ETF,Fixed Income & Cash,Emerging Markets Government Bonds
+VXUS,Vanguard Total International Stock ETF,International Equity,Total International Stock
+VYMI,Vanguard International High Dividend Yield ETF,International Equity,International High Dividend
+WCLD,WisdomTree Cloud Computing Fund,Thematic Equity,Cloud Computing
+XAR,State Street SPDR S&P Aerospace & Defense ETF,US Equity,Aerospace & Defense
+XBI,State Street SPDR S&P Biotech ETF,US Equity,Biotechnology
+XHB,State Street SPDR S&P Homebuilders ETF,US Equity,Homebuilders
+XLB,State Street Materials Select Sector SPDR ETF,Commodities & Hard Assets,Materials
+XLC,State Street Communication Services Select Sector SPDR ETF,US Equity,Communication Services
+XLE,State Street Energy Select Sector SPDR ETF,Commodities & Hard Assets,Energy
+XLF,State Street Financial Select Sector SPDR ETF,US Equity,Financials
+XLI,State Street Industrial Select Sector SPDR ETF,US Equity,Industrials
+XLK,State Street Technology Select Sector SPDR ETF,US Equity,Technology
+XLP,State Street Consumer Staples Select Sector SPDR ETF,Defensive Equity,Consumer Staples
+XLU,State Street Utilities Select Sector SPDR ETF,Defensive Equity,Utilities
+XLV,State Street Health Care Select Sector SPDR ETF,Defensive Equity,Healthcare
+XLY,State Street Consumer Discretionary Select Sector SPDR ETF,US Equity,Consumer Discretionary
+XME,State Street SPDR S&P Metals & Mining ETF,Commodities & Hard Assets,Metals & Mining
+XOP,State Street SPDR S&P Oil & Gas Exploration & Production ETF,Commodities & Hard Assets,Oil & Gas Exploration & Production
+XRT,State Street SPDR S&P Retail ETF,US Equity,Retail
+XSOE,Wisdomtree Emerging Markets EX-State-Owned Enterprises Fund,International Equity,Emerging Markets ex State-Owned Enterprises
+XT,iShares Future Exponential Technologies ETF,Thematic Equity,Exponential Technologies
+XYLD,Global X S&P 500 Covered Call ETF,US Equity,S&P 500 Covered Call
