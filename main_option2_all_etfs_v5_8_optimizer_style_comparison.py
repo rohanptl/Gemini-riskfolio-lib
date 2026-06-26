@@ -116,8 +116,28 @@ BENCHMARKS_ARE_REPORTING_ONLY = True
 
 MIN_VALID_RATIO = 0.80
 
-OUTPUT_DIR = Path("outputs_option2_v5_9_cvar_sharpe")
+OUTPUT_DIR = Path("outputs_option2_v5_8_optimizer_styles")
 OUTPUT_DIR.mkdir(exist_ok=True)
+
+# V5.8 optimizer style comparison.
+# Keep V5.7 signal/selection logic fixed; only change portfolio construction.
+OPTIMIZER_STYLES = [
+    "BL_MV_Sharpe",           # Current V5.7-style baseline
+    "Classic_MV_Sharpe",      # Historical mean/covariance max Sharpe
+    "Classic_CVaR_Sharpe",    # Tail-risk-aware Sharpe
+    "Classic_CDaR_Sharpe",    # Drawdown-aware Sharpe
+    "Classic_MAD_Sharpe",     # Mean absolute deviation risk
+    "MinRisk_MV",             # Minimum variance
+    "RiskParity_MV",          # Equal risk contribution
+    "HRP_MV",                 # Hierarchical Risk Parity
+    "HERC_MV",                # Hierarchical Equal Risk Contribution
+    "NCO_MV_Sharpe",          # Nested Clustered Optimization
+    "EqualWeight",            # Simple reference baseline
+]
+
+DEFAULT_OPTIMIZER_STYLE = "BL_MV_Sharpe"
+STYLE_OUTPUT_DIR = OUTPUT_DIR / "styles"
+STYLE_OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Heatmap safety. Full 197x197 CSV is saved, but PNG is limited to avoid OOM kills.
 HEATMAP_MAX_ASSETS = 40
@@ -963,17 +983,180 @@ def apply_turnover_cap(
 
 
 # ============================================================
-# RISKFOLIO OPTIMIZER
+# RISKFOLIO OPTIMIZER STYLE ENGINE
 # ============================================================
 
-def optimize_winner_basket(train_returns: pd.DataFrame, eligible_assets: list[str]) -> pd.Series:
+def _finalize_optimizer_weights(
+    w: pd.DataFrame | pd.Series,
+    available_assets: list[str],
+    eligible_assets: list[str],
+) -> pd.Series:
+    """
+    Normalizes, caps, and aligns optimizer weights.
+    """
+    s = extract_weight_series(w, available_assets)
+
+    s = cap_individual_weights(
+        s,
+        max_weight=MAX_RISK_ASSET_WEIGHT,
+        min_weight_to_keep=MIN_WEIGHT_TO_KEEP,
+    )
+
+    return s.reindex(eligible_assets).fillna(0.0)
+
+
+def _classic_optimizer(
+    r: pd.DataFrame,
+    eligible_assets: list[str],
+    rm: str = "MV",
+    obj: str = "Sharpe",
+) -> pd.Series:
+    available_assets = r.columns.tolist()
+
+    port = rp.Portfolio(
+        returns=r,
+        upperlng=MAX_RISK_ASSET_WEIGHT,
+        sht=False,
+    )
+
+    port.assets_stats(
+        method_mu="hist",
+        method_cov="ledoit",
+    )
+
+    w = port.optimization(
+        model="Classic",
+        rm=rm,
+        obj=obj,
+        rf=DAILY_RF,
+        hist=True,
+    )
+
+    if w is None or len(w) == 0:
+        raise RuntimeError(f"Classic optimizer returned empty weights for rm={rm}, obj={obj}.")
+
+    return _finalize_optimizer_weights(w, available_assets, eligible_assets)
+
+
+def _black_litterman_optimizer(
+    r: pd.DataFrame,
+    eligible_assets: list[str],
+    rm: str = "MV",
+    obj: str = "Sharpe",
+) -> pd.Series:
+    available_assets = r.columns.tolist()
+
+    port = rp.Portfolio(
+        returns=r,
+        upperlng=MAX_RISK_ASSET_WEIGHT,
+        sht=False,
+    )
+
+    port.assets_stats(
+        method_mu="hist",
+        method_cov="ledoit",
+    )
+
+    P, Q = build_momentum_views(r)
+
+    port.blacklitterman_stats(
+        P=P,
+        Q=Q,
+        rf=DAILY_RF,
+        w=None,
+        eq=False,
+        method_mu="hist",
+        method_cov="ledoit",
+    )
+
+    w = port.optimization(
+        model="BL",
+        rm=rm,
+        obj=obj,
+        rf=DAILY_RF,
+        hist=False,
+    )
+
+    if w is None or len(w) == 0:
+        raise RuntimeError(f"Black-Litterman optimizer returned empty weights for rm={rm}, obj={obj}.")
+
+    return _finalize_optimizer_weights(w, available_assets, eligible_assets)
+
+
+def _risk_parity_optimizer(
+    r: pd.DataFrame,
+    eligible_assets: list[str],
+    rm: str = "MV",
+) -> pd.Series:
+    available_assets = r.columns.tolist()
+
+    port = rp.Portfolio(
+        returns=r,
+        upperlng=MAX_RISK_ASSET_WEIGHT,
+        sht=False,
+    )
+
+    port.assets_stats(
+        method_mu="hist",
+        method_cov="ledoit",
+    )
+
+    w = port.rp_optimization(
+        model="Classic",
+        rm=rm,
+        rf=DAILY_RF,
+        b=None,
+        hist=True,
+    )
+
+    if w is None or len(w) == 0:
+        raise RuntimeError(f"Risk parity optimizer returned empty weights for rm={rm}.")
+
+    return _finalize_optimizer_weights(w, available_assets, eligible_assets)
+
+
+def _hierarchical_optimizer(
+    r: pd.DataFrame,
+    eligible_assets: list[str],
+    model: str = "HRP",
+    rm: str = "MV",
+    obj: str = "Sharpe",
+) -> pd.Series:
+    available_assets = r.columns.tolist()
+
+    hc = rp.HCPortfolio(returns=r)
+
+    kwargs = {
+        "model": model,
+        "codependence": "pearson",
+        "rm": rm,
+        "rf": DAILY_RF,
+        "linkage": "ward",
+        "max_k": 10,
+        "leaf_order": True,
+    }
+
+    if model == "NCO":
+        kwargs["obj"] = obj
+
+    w = hc.optimization(**kwargs)
+
+    if w is None or len(w) == 0:
+        raise RuntimeError(f"Hierarchical optimizer returned empty weights for model={model}, rm={rm}, obj={obj}.")
+
+    return _finalize_optimizer_weights(w, available_assets, eligible_assets)
+
+
+def optimize_winner_basket(
+    train_returns: pd.DataFrame,
+    eligible_assets: list[str],
+    style_name: str = DEFAULT_OPTIMIZER_STYLE,
+) -> pd.Series:
     """
     Uses Riskfolio only after the winner basket has been selected.
 
-    V5.9 default:
-    - Alpha/trend model selects eligible ETFs.
-    - Riskfolio sizes only those eligible winners.
-    - Portfolio construction uses Classic CVaR Sharpe.
+    V5.8 keeps the V5.7 alpha/selection layer fixed and changes only this
+    portfolio-construction style.
     """
     r = train_returns[eligible_assets]
     r = r.dropna(axis=1, how="all")
@@ -985,77 +1168,44 @@ def optimize_winner_basket(train_returns: pd.DataFrame, eligible_assets: list[st
         return equal_weight(eligible_assets)
 
     try:
-        port = rp.Portfolio(
-            returns=r,
-            upperlng=MAX_RISK_ASSET_WEIGHT,
-            sht=False,
-        )
+        if style_name == "BL_MV_Sharpe":
+            return _black_litterman_optimizer(r, eligible_assets, rm="MV", obj="Sharpe")
 
-        port.assets_stats(
-            method_mu="hist",
-            method_cov="ledoit",
-        )
+        if style_name == "Classic_MV_Sharpe":
+            return _classic_optimizer(r, eligible_assets, rm="MV", obj="Sharpe")
 
-        w = port.optimization(
-            model="Classic",
-            rm="CVaR",
-            obj="Sharpe",
-            rf=DAILY_RF,
-            hist=True,
-        )
+        if style_name == "Classic_CVaR_Sharpe":
+            return _classic_optimizer(r, eligible_assets, rm="CVaR", obj="Sharpe")
 
-        if w is None or len(w) == 0:
-            raise RuntimeError("Classic CVaR Sharpe optimizer returned empty weights.")
+        if style_name == "Classic_CDaR_Sharpe":
+            return _classic_optimizer(r, eligible_assets, rm="CDaR", obj="Sharpe")
 
-        s = extract_weight_series(w, available_assets)
+        if style_name == "Classic_MAD_Sharpe":
+            return _classic_optimizer(r, eligible_assets, rm="MAD", obj="Sharpe")
 
-        s = cap_individual_weights(
-            s,
-            max_weight=MAX_RISK_ASSET_WEIGHT,
-            min_weight_to_keep=MIN_WEIGHT_TO_KEEP,
-        )
+        if style_name == "MinRisk_MV":
+            return _classic_optimizer(r, eligible_assets, rm="MV", obj="MinRisk")
 
-        return s.reindex(eligible_assets).fillna(0.0)
+        if style_name == "RiskParity_MV":
+            return _risk_parity_optimizer(r, eligible_assets, rm="MV")
 
-    except Exception as cvar_error:
-        print(f"Classic CVaR Sharpe optimization failed. Falling back to Classic MAD Sharpe. Error: {cvar_error}")
+        if style_name == "HRP_MV":
+            return _hierarchical_optimizer(r, eligible_assets, model="HRP", rm="MV", obj="Sharpe")
 
-        try:
-            port = rp.Portfolio(
-                returns=r,
-                upperlng=MAX_RISK_ASSET_WEIGHT,
-                sht=False,
-            )
+        if style_name == "HERC_MV":
+            return _hierarchical_optimizer(r, eligible_assets, model="HERC", rm="MV", obj="Sharpe")
 
-            port.assets_stats(
-                method_mu="hist",
-                method_cov="ledoit",
-            )
+        if style_name == "NCO_MV_Sharpe":
+            return _hierarchical_optimizer(r, eligible_assets, model="NCO", rm="MV", obj="Sharpe")
 
-            w = port.optimization(
-                model="Classic",
-                rm="MAD",
-                obj="Sharpe",
-                rf=DAILY_RF,
-                hist=True,
-            )
-
-            if w is None or len(w) == 0:
-                raise RuntimeError("Classic MAD Sharpe optimizer returned empty weights.")
-
-            s = extract_weight_series(w, available_assets)
-
-            s = cap_individual_weights(
-                s,
-                max_weight=MAX_RISK_ASSET_WEIGHT,
-                min_weight_to_keep=MIN_WEIGHT_TO_KEEP,
-            )
-
-            return s.reindex(eligible_assets).fillna(0.0)
-
-        except Exception as mad_error:
-            print(f"Classic MAD Sharpe optimization failed. Falling back to equal weight. Error: {mad_error}")
+        if style_name == "EqualWeight":
             return equal_weight(eligible_assets)
+
+        raise ValueError(f"Unknown optimizer style: {style_name}")
+
+    except Exception as style_error:
+        print(f"{style_name} failed. Falling back to EqualWeight for this rebalance. Error: {style_error}")
+        return equal_weight(eligible_assets)
 
 
 # ============================================================
@@ -1325,6 +1475,253 @@ def save_final_portfolio_correlation_outputs(
     print(f"Final portfolio correlation outputs saved for {n} holdings.")
 
 
+
+def run_backtest_for_optimizer_style(
+    style_name: str,
+    returns: pd.DataFrame,
+    available_risk_tickers: list[str],
+    final_assets: list[str],
+    rebalance_dates: pd.DatetimeIndex,
+) -> dict:
+    """
+    Runs the full V5.7 backtest loop for one optimizer style.
+
+    The signal/alpha layer stays fixed. Only optimize_winner_basket(..., style_name)
+    changes between runs.
+    """
+    style_dir = STYLE_OUTPUT_DIR / style_name
+    style_dir.mkdir(parents=True, exist_ok=True)
+
+    weights_by_date = {}
+    signal_by_date = []
+    turnover_rows = []
+    eligibility_rows = []
+    daily_portfolio_returns = []
+
+    previous_weights = None
+
+    print(f"\n=== Running optimizer style: {style_name} ===")
+
+    for i, date in enumerate(rebalance_dates):
+        full_train_returns = returns.loc[:date]
+        train_returns = returns.loc[:date].iloc[-LOOKBACK:]
+
+        signal_breadth = compute_signal_breadth(
+            full_train_returns=full_train_returns,
+            risk_assets=available_risk_tickers,
+        )
+
+        eligible_assets, score_table = select_eligible_assets(
+            train_returns=train_returns,
+            risk_assets=available_risk_tickers,
+        )
+
+        risk_weights = optimize_winner_basket(
+            train_returns=train_returns,
+            eligible_assets=eligible_assets,
+            style_name=style_name,
+        )
+
+        active_sleeve_vol = estimate_active_sleeve_vol(
+            train_returns=train_returns,
+            risk_weights=risk_weights,
+        )
+
+        breadth_cash_weight = cash_weight_from_breadth(signal_breadth)
+        vol_cash_weight = cash_weight_from_vol(active_sleeve_vol)
+
+        cash_weight = max(breadth_cash_weight, vol_cash_weight)
+
+        target_final_weights = apply_cash_sleeve(
+            risk_weights=risk_weights,
+            cash_weight=cash_weight,
+            final_assets=final_assets,
+        )
+
+        final_weights = apply_turnover_cap(
+            previous_weights=previous_weights,
+            target_weights=target_final_weights,
+            all_assets=final_assets,
+            max_turnover=MAX_TURNOVER_PER_REBALANCE,
+        )
+
+        turnover_before_prune = calculate_turnover(
+            previous_weights=previous_weights,
+            current_weights=final_weights,
+            all_assets=final_assets,
+        )
+
+        final_weights = prune_tiny_positions_after_turnover(final_weights)
+
+        turnover = calculate_turnover(
+            previous_weights=previous_weights,
+            current_weights=final_weights,
+            all_assets=final_assets,
+        )
+
+        previous_weights = final_weights.copy()
+        weights_by_date[date] = final_weights
+
+        score_table_out = score_table.copy()
+        score_table_out["Date"] = date
+        score_table_out["OptimizerStyle"] = style_name
+        score_table_out["Eligible"] = score_table_out.index.isin(eligible_assets)
+        score_table_out["Rank"] = range(1, len(score_table_out) + 1)
+        score_table_out = score_table_out.reset_index().rename(columns={"index": "Ticker"})
+        eligibility_rows.append(score_table_out)
+
+        signal_by_date.append(
+            {
+                "Date": date,
+                "OptimizerStyle": style_name,
+                "SignalBreadth": signal_breadth,
+                "CashWeight": cash_weight,
+                "BreadthCashWeight": breadth_cash_weight,
+                "VolCashWeight": vol_cash_weight,
+                "ActiveSleeveVol": active_sleeve_vol,
+                "RiskWeight": 1.0 - cash_weight,
+                "EligibleAssets": ",".join(eligible_assets),
+                "EligibleCount": len(eligible_assets),
+            }
+        )
+
+        turnover_rows.append(
+            {
+                "Date": date,
+                "OptimizerStyle": style_name,
+                "Turnover": turnover,
+                "TurnoverBeforePrune": turnover_before_prune,
+                "ExtraTurnoverFromPrune": max(0.0, turnover - turnover_before_prune),
+                "SignalBreadth": signal_breadth,
+                "CashWeight": cash_weight,
+                "BreadthCashWeight": breadth_cash_weight,
+                "VolCashWeight": vol_cash_weight,
+                "ActiveSleeveVol": active_sleeve_vol,
+                "EligibleAssets": ",".join(eligible_assets),
+                "EligibleCount": len(eligible_assets),
+            }
+        )
+
+        if i + 1 < len(rebalance_dates):
+            next_date = rebalance_dates[i + 1]
+            forward_returns = returns.loc[
+                (returns.index > date) & (returns.index <= next_date),
+                final_assets,
+            ]
+        else:
+            forward_returns = returns.loc[
+                returns.index > date,
+                final_assets,
+            ]
+
+        if not forward_returns.empty:
+            period_portfolio_returns = forward_returns.dot(final_weights)
+            daily_portfolio_returns.append(period_portfolio_returns)
+
+        if i == 0 or (i + 1) % 10 == 0 or i + 1 == len(rebalance_dates):
+            top_weights = final_weights.sort_values(ascending=False).head(5).round(4).to_dict()
+            print(
+                f"{style_name} | {date.date()} | "
+                f"turnover={turnover if not np.isnan(turnover) else 0:.2%} | "
+                f"cash={cash_weight:.2%} | "
+                f"eligible={len(eligible_assets)} | "
+                f"top={top_weights}"
+            )
+
+    weights_df = pd.DataFrame(weights_by_date).T
+    weights_df.index.name = "RebalanceDate"
+    weights_df.to_csv(style_dir / "weights_by_rebalance.csv")
+
+    signal_df = pd.DataFrame(signal_by_date)
+    signal_df.to_csv(style_dir / "signal_cash_history.csv", index=False)
+
+    turnover_df = pd.DataFrame(turnover_rows)
+    turnover_df.to_csv(style_dir / "turnover_by_rebalance.csv", index=False)
+
+    eligibility_df = pd.concat(eligibility_rows, ignore_index=True)
+    eligibility_df.to_csv(style_dir / "eligibility_history.csv", index=False)
+
+    final_weights = weights_df.iloc[-1].sort_values(ascending=False)
+    final_weights = final_weights[final_weights >= MIN_PRINT_WEIGHT]
+    final_weights.to_csv(style_dir / "final_target_weights.csv", header=["Weight"])
+
+    tradeable_final_weights = make_tradeable_display_weights(
+        final_weights,
+        min_display_weight=TRADEABLE_MIN_WEIGHT,
+    )
+    tradeable_final_weights.to_csv(
+        style_dir / "final_target_weights_tradeable.csv",
+        header=["Weight"],
+    )
+
+    save_final_portfolio_correlation_outputs(
+        all_returns=returns,
+        final_weights=final_weights,
+        output_dir=style_dir,
+        min_weight=MIN_PRINT_WEIGHT,
+    )
+
+    if daily_portfolio_returns:
+        strategy_returns = pd.concat(daily_portfolio_returns).sort_index()
+    else:
+        strategy_returns = pd.Series(dtype=float, name=style_name)
+
+    strategy_returns.name = style_name
+
+    strategy_equity = (1 + strategy_returns).cumprod()
+
+    portfolio_backtest = pd.DataFrame(
+        {
+            "DailyReturn": strategy_returns,
+            "EquityCurve": strategy_equity,
+        }
+    )
+    portfolio_backtest.index.name = "Date"
+    portfolio_backtest.to_csv(style_dir / "portfolio_backtest.csv")
+
+    benchmark_summary = make_benchmark_comparison(
+        strategy_returns=strategy_returns,
+        all_returns=returns,
+        benchmark_tickers=BENCHMARK_TICKERS,
+    )
+    benchmark_summary.to_csv(style_dir / "benchmark_comparison.csv")
+
+    monthly_returns = make_monthly_return_table(
+        strategy_returns=strategy_returns,
+        all_returns=returns,
+        benchmark_tickers=BENCHMARK_TICKERS,
+    )
+    monthly_returns.to_csv(style_dir / "monthly_returns.csv")
+
+    drawdown_data = make_drawdown_table(
+        strategy_returns=strategy_returns,
+        all_returns=returns,
+        benchmark_tickers=BENCHMARK_TICKERS,
+    )
+    drawdown_data.to_csv(style_dir / "drawdown_data.csv")
+
+    strategy_summary = benchmark_summary.loc["Strategy"].to_dict()
+    strategy_summary["OptimizerStyle"] = style_name
+    strategy_summary["AverageTurnover"] = turnover_df["Turnover"].dropna().mean()
+    strategy_summary["MedianTurnover"] = turnover_df["Turnover"].dropna().median()
+    strategy_summary["AverageExtraTurnoverFromPrune"] = turnover_df["ExtraTurnoverFromPrune"].dropna().mean()
+    strategy_summary["FinalHoldings"] = int((final_weights > 0).sum())
+    strategy_summary["FinalCashWeight"] = float(final_weights.get(CASH_TICKER, 0.0))
+
+    bench_long = benchmark_summary.reset_index()
+    bench_long["OptimizerStyle"] = style_name
+
+    return {
+        "style": style_name,
+        "style_dir": style_dir,
+        "strategy_returns": strategy_returns,
+        "benchmark_summary": benchmark_summary,
+        "benchmark_summary_long": bench_long,
+        "strategy_summary": strategy_summary,
+        "turnover_df": turnover_df,
+        "final_weights": final_weights,
+    }
+
 # ============================================================
 # MAIN BACKTEST
 # ============================================================
@@ -1395,7 +1792,7 @@ def main() -> None:
     if USE_CASH_SLEEVE and CASH_TICKER not in final_assets:
         final_assets.append(CASH_TICKER)
 
-    # Correlation diagnostics.
+    # Correlation diagnostics for full investable universe.
     corr = returns[available_risk_tickers].corr()
     corr.to_csv(OUTPUT_DIR / "correlation_matrix.csv")
     save_correlation_heatmap(corr, OUTPUT_DIR / "correlation_heatmap.png")
@@ -1405,244 +1802,89 @@ def main() -> None:
     if len(rebalance_dates) == 0:
         raise ValueError("Not enough return history for selected LOOKBACK.")
 
-    weights_by_date = {}
-    signal_by_date = []
-    turnover_rows = []
-    eligibility_rows = []
-    daily_portfolio_returns = []
+    print(f"\nRunning V5.8 optimizer-style comparison with {len(rebalance_dates)} rebalance dates.")
+    print(f"Styles: {OPTIMIZER_STYLES}")
 
-    previous_weights = None
+    results = []
 
-    print(f"\nRunning Option 2 V5.7 no-benchmark-signal-filter backtest with {len(rebalance_dates)} rebalance dates...")
-
-    for i, date in enumerate(rebalance_dates):
-        full_train_returns = returns.loc[:date]
-        train_returns = returns.loc[:date].iloc[-LOOKBACK:]
-
-        signal_breadth = compute_signal_breadth(
-            full_train_returns=full_train_returns,
-            risk_assets=available_risk_tickers,
-        )
-
-        eligible_assets, score_table = select_eligible_assets(
-            train_returns=train_returns,
-            risk_assets=available_risk_tickers,
-        )
-
-        risk_weights = optimize_winner_basket(
-            train_returns=train_returns,
-            eligible_assets=eligible_assets,
-        )
-
-        active_sleeve_vol = estimate_active_sleeve_vol(
-            train_returns=train_returns,
-            risk_weights=risk_weights,
-        )
-
-        breadth_cash_weight = cash_weight_from_breadth(signal_breadth)
-        vol_cash_weight = cash_weight_from_vol(active_sleeve_vol)
-
-        cash_weight = max(breadth_cash_weight, vol_cash_weight)
-
-        target_final_weights = apply_cash_sleeve(
-            risk_weights=risk_weights,
-            cash_weight=cash_weight,
+    for style_name in OPTIMIZER_STYLES:
+        result = run_backtest_for_optimizer_style(
+            style_name=style_name,
+            returns=returns,
+            available_risk_tickers=available_risk_tickers,
             final_assets=final_assets,
+            rebalance_dates=rebalance_dates,
         )
+        results.append(result)
 
-        final_weights = apply_turnover_cap(
-            previous_weights=previous_weights,
-            target_weights=target_final_weights,
-            all_assets=final_assets,
-            max_turnover=MAX_TURNOVER_PER_REBALANCE,
-        )
+    # ------------------------------------------------------------------
+    # Top-level comparison outputs
+    # ------------------------------------------------------------------
+    style_summary = pd.DataFrame([r["strategy_summary"] for r in results])
+    style_summary = style_summary.set_index("OptimizerStyle")
 
-        turnover_before_prune = calculate_turnover(
-            previous_weights=previous_weights,
-            current_weights=final_weights,
-            all_assets=final_assets,
-        )
+    # Rank by practical V5 goal:
+    # 1. Sharpe
+    # 2. Max drawdown
+    # 3. CAGR
+    style_summary["RankBySharpe"] = style_summary["Sharpe"].rank(ascending=False, method="min")
+    style_summary["RankByMaxDrawdown"] = style_summary["Max Drawdown"].rank(ascending=False, method="min")
+    style_summary["RankByCAGR"] = style_summary["CAGR"].rank(ascending=False, method="min")
 
-        # V5.6: remove tiny stale residuals after the turnover cap.
-        # This keeps the no-whipsaw benefit of the turnover gate while making
-        # the final portfolio more tradeable.
-        final_weights = prune_tiny_positions_after_turnover(final_weights)
-
-        turnover = calculate_turnover(
-            previous_weights=previous_weights,
-            current_weights=final_weights,
-            all_assets=final_assets,
-        )
-
-        previous_weights = final_weights.copy()
-
-        weights_by_date[date] = final_weights
-
-        score_table_out = score_table.copy()
-        score_table_out["Date"] = date
-        score_table_out["Eligible"] = score_table_out.index.isin(eligible_assets)
-        score_table_out["Rank"] = range(1, len(score_table_out) + 1)
-        score_table_out = score_table_out.reset_index().rename(columns={"index": "Ticker"})
-        eligibility_rows.append(score_table_out)
-
-        signal_by_date.append(
-            {
-                "Date": date,
-                "SignalBreadth": signal_breadth,
-                "CashWeight": cash_weight,
-                "BreadthCashWeight": breadth_cash_weight,
-                "VolCashWeight": vol_cash_weight,
-                "ActiveSleeveVol": active_sleeve_vol,
-                "RiskWeight": 1.0 - cash_weight,
-                "EligibleAssets": ",".join(eligible_assets),
-                "EligibleCount": len(eligible_assets),
-            }
-        )
-
-        turnover_rows.append(
-            {
-                "Date": date,
-                "Turnover": turnover,
-                "TurnoverBeforePrune": turnover_before_prune,
-                "ExtraTurnoverFromPrune": max(0.0, turnover - turnover_before_prune),
-                "SignalBreadth": signal_breadth,
-                "CashWeight": cash_weight,
-                "BreadthCashWeight": breadth_cash_weight,
-                "VolCashWeight": vol_cash_weight,
-                "ActiveSleeveVol": active_sleeve_vol,
-                "EligibleAssets": ",".join(eligible_assets),
-                "EligibleCount": len(eligible_assets),
-            }
-        )
-
-        if i + 1 < len(rebalance_dates):
-            next_date = rebalance_dates[i + 1]
-            forward_returns = returns.loc[
-                (returns.index > date) & (returns.index <= next_date),
-                final_assets,
-            ]
-        else:
-            forward_returns = returns.loc[
-                returns.index > date,
-                final_assets,
-            ]
-
-        if not forward_returns.empty:
-            period_portfolio_returns = forward_returns.dot(final_weights)
-            daily_portfolio_returns.append(period_portfolio_returns)
-
-        top_weights = final_weights.sort_values(ascending=False).head(10).round(4).to_dict()
-
-        print(
-            f"{date.date()} | breadth={signal_breadth:.2f} | "
-            f"SGOV/cash={cash_weight:.2%} | "
-            f"active_vol={active_sleeve_vol:.2%} | "
-            f"turnover={turnover if not np.isnan(turnover) else 0:.2%} | "
-            f"eligible={eligible_assets} | "
-            f"selected={(final_weights > 0).sum()} assets | "
-            f"top weights: {top_weights}"
-        )
-
-    weights_df = pd.DataFrame(weights_by_date).T
-    weights_df.index.name = "RebalanceDate"
-    weights_df.to_csv(OUTPUT_DIR / "weights_by_rebalance.csv")
-
-    signal_df = pd.DataFrame(signal_by_date)
-    signal_df.to_csv(OUTPUT_DIR / "signal_cash_history.csv", index=False)
-
-    turnover_df = pd.DataFrame(turnover_rows)
-    turnover_df.to_csv(OUTPUT_DIR / "turnover_by_rebalance.csv", index=False)
-
-    eligibility_df = pd.concat(eligibility_rows, ignore_index=True)
-    eligibility_df.to_csv(OUTPUT_DIR / "eligibility_history.csv", index=False)
-
-    final_weights = weights_df.iloc[-1].sort_values(ascending=False)
-    final_weights = final_weights[final_weights >= MIN_PRINT_WEIGHT]
-    final_weights.to_csv(OUTPUT_DIR / "final_target_weights.csv", header=["Weight"])
-
-    tradeable_final_weights = make_tradeable_display_weights(
-        final_weights,
-        min_display_weight=TRADEABLE_MIN_WEIGHT,
-    )
-    tradeable_final_weights.to_csv(
-        OUTPUT_DIR / "final_target_weights_tradeable.csv",
-        header=["Weight"],
+    style_summary = style_summary.sort_values(
+        ["Sharpe", "Max Drawdown", "CAGR"],
+        ascending=[False, False, False],
     )
 
-    save_final_portfolio_correlation_outputs(
-        all_returns=returns,
-        final_weights=final_weights,
-        output_dir=OUTPUT_DIR,
-        min_weight=MIN_PRINT_WEIGHT,
+    style_summary.to_csv(OUTPUT_DIR / "style_comparison.csv")
+
+    benchmark_by_style = pd.concat(
+        [r["benchmark_summary_long"] for r in results],
+        ignore_index=True,
     )
+    benchmark_by_style.to_csv(OUTPUT_DIR / "benchmark_comparison_by_style.csv", index=False)
 
-    if daily_portfolio_returns:
-        strategy_returns = pd.concat(daily_portfolio_returns).sort_index()
-    else:
-        strategy_returns = pd.Series(dtype=float, name="Strategy")
+    turnover_by_style = pd.concat(
+        [r["turnover_df"] for r in results],
+        ignore_index=True,
+    )
+    turnover_by_style.to_csv(OUTPUT_DIR / "turnover_by_style.csv", index=False)
 
-    strategy_returns.name = "Strategy"
-
-    strategy_equity = (1 + strategy_returns).cumprod()
-
-    portfolio_backtest = pd.DataFrame(
+    final_weights_by_style = pd.DataFrame(
         {
-            "DailyReturn": strategy_returns,
-            "EquityCurve": strategy_equity,
+            r["style"]: r["final_weights"]
+            for r in results
         }
-    )
-    portfolio_backtest.index.name = "Date"
-    portfolio_backtest.to_csv(OUTPUT_DIR / "portfolio_backtest.csv")
+    ).fillna(0.0)
+    final_weights_by_style.to_csv(OUTPUT_DIR / "final_weights_by_style.csv")
 
-    benchmark_summary = make_benchmark_comparison(
-        strategy_returns=strategy_returns,
-        all_returns=returns,
-        benchmark_tickers=BENCHMARK_TICKERS,
-    )
-    benchmark_summary.to_csv(OUTPUT_DIR / "benchmark_comparison.csv")
+    all_strategy_returns = pd.concat(
+        [r["strategy_returns"] for r in results],
+        axis=1,
+    ).sort_index()
+    all_strategy_returns.to_csv(OUTPUT_DIR / "strategy_returns_by_style.csv")
 
-    monthly_returns = make_monthly_return_table(
-        strategy_returns=strategy_returns,
-        all_returns=returns,
-        benchmark_tickers=BENCHMARK_TICKERS,
-    )
-    monthly_returns.to_csv(OUTPUT_DIR / "monthly_returns.csv")
+    all_strategy_equity = (1 + all_strategy_returns).cumprod()
+    all_strategy_equity.to_csv(OUTPUT_DIR / "strategy_equity_by_style.csv")
 
-    drawdown_data = make_drawdown_table(
-        strategy_returns=strategy_returns,
-        all_returns=returns,
-        benchmark_tickers=BENCHMARK_TICKERS,
-    )
-    drawdown_data.to_csv(OUTPUT_DIR / "drawdown_data.csv")
+    print("\nOptimizer style comparison:")
+    print(style_summary)
 
-    print("\nFinal target weights:")
-    print((final_weights * 100).round(2).astype(str) + "%")
-
-    print("\nLatest signal state:")
-    print(signal_df.tail(1).T)
-
-    print("\nBenchmark comparison:")
-    print(benchmark_summary)
-
-    print("\nLatest turnover rows:")
-    print(turnover_df.tail())
+    print("\nBest style by Sharpe:")
+    print(style_summary.head(1).T)
 
     print("\nFiles written:")
+    print(f"- {OUTPUT_DIR / 'style_comparison.csv'}")
+    print(f"- {OUTPUT_DIR / 'benchmark_comparison_by_style.csv'}")
+    print(f"- {OUTPUT_DIR / 'turnover_by_style.csv'}")
+    print(f"- {OUTPUT_DIR / 'final_weights_by_style.csv'}")
+    print(f"- {OUTPUT_DIR / 'strategy_returns_by_style.csv'}")
+    print(f"- {OUTPUT_DIR / 'strategy_equity_by_style.csv'}")
     print(f"- {OUTPUT_DIR / 'correlation_matrix.csv'}")
     print(f"- {OUTPUT_DIR / 'correlation_heatmap.png'}")
-    print(f"- {OUTPUT_DIR / 'final_portfolio_correlation_matrix.csv'}")
-    print(f"- {OUTPUT_DIR / 'final_portfolio_correlation_heatmap.png'}")
-    print(f"- {OUTPUT_DIR / 'final_portfolio_high_correlation_pairs.csv'}")
-    print(f"- {OUTPUT_DIR / 'weights_by_rebalance.csv'}")
-    print(f"- {OUTPUT_DIR / 'final_target_weights.csv'}")
-    print(f"- {OUTPUT_DIR / 'final_target_weights_tradeable.csv'}")
-    print(f"- {OUTPUT_DIR / 'signal_cash_history.csv'}")
-    print(f"- {OUTPUT_DIR / 'turnover_by_rebalance.csv'}")
-    print(f"- {OUTPUT_DIR / 'eligibility_history.csv'}")
-    print(f"- {OUTPUT_DIR / 'portfolio_backtest.csv'}")
-    print(f"- {OUTPUT_DIR / 'benchmark_comparison.csv'}")
-    print(f"- {OUTPUT_DIR / 'monthly_returns.csv'}")
-    print(f"- {OUTPUT_DIR / 'drawdown_data.csv'}")
+    print(f"- {STYLE_OUTPUT_DIR / '<style_name>' / 'benchmark_comparison.csv'}")
+    print(f"- {STYLE_OUTPUT_DIR / '<style_name>' / 'final_target_weights.csv'}")
+    print(f"- {STYLE_OUTPUT_DIR / '<style_name>' / 'final_portfolio_correlation_heatmap.png'}")
 
 
 if __name__ == "__main__":
