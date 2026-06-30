@@ -1,3 +1,12 @@
+python main_option2_all_etfs_v5_16_score_tilted_cvar_production_with_attribution.py
+
+python explain_v516_allocation_fixed.py \
+  --output-dir outputs_option2_v5_16_score_tilted_cvar \
+  --window 2023 \
+  --zip
+  
+
+
 Below is a clean explanation of **V5.16 production script** using block and sequence diagrams.
 
 You can paste the Mermaid diagrams into a Mermaid viewer such as `mermaid.live`.
