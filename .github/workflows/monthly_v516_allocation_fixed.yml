@@ -43,7 +43,7 @@ jobs:
 
       - name: Run V5.16 production strategy with attribution
         run: |
-          python v5_16_Final.py --end-date auto
+          python v5_16_Final.py   --end-date auto
 
       - name: Check whether current-month rebalance exists
         id: check_rebalance
