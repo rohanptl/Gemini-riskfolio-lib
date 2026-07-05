@@ -1,6 +1,6 @@
 # V5.16 Allocation Explanation Report
 
-Generated at: `2026-07-04T01:08:00`
+Generated at: `2026-07-05T01:14:38`
 
 Output folder: `outputs_option2_v5_16_score_tilted_cvar`  
 Window folder: `outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023`  
@@ -36,22 +36,22 @@ V5.16 is a monthly ETF allocation model. It starts with the Wealthfront ETF univ
 
 | Ticker | FinalWeightPct | Score | AboveSMA50 | AboveSMA126 | PositiveMom63 | PositiveMom126 | Vol63AnnPct | SelectionBucket | OptimizerRawWeight | ScoreTiltMultiplier | RiskWeightAfterScoreTilt | CashScaledTargetWeight | WeightAfterTurnoverCapBeforePrune | WeightAfterPruningFinal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| SGOV | 18.74% |  |  |  |  |  | n/a | Cash / risk-control sleeve | 0.0 |  | 0.0 | 0.0 | 0.1648714882552497 | 0.1874326702794585 |
-| EIS | 9.54% | 2.544 | False | False | True | True | 26.55% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0839589644439095 | 0.0954479944722583 |
-| EWT | 8.48% | 29.696 | True | True | True | True | 39.74% | Selected by latest signal basket | 0.1199999996316584 | 1.163333333333333 | 0.12 | 0.12 | 0.0746012560982173 | 0.0848097678055949 |
-| XBI | 7.68% | 22.747 | True | True | True | True | 28.81% | Selected by latest signal basket | 0.1199999999213218 | 1.14 | 0.12 | 0.12 | 0.0675558092775483 | 0.0768002148811653 |
-| OIH | 6.61% | -0.492 | False | False | False | True | 29.59% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0581148697203625 | 0.0660673675594334 |
-| EWY | 6.47% | 24.611 | False | True | True | True | 75.61% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0569333577598444 | 0.064724176301378 |
-| AVUV | 6.17% | 17.247 | True | True | True | True | 13.32% | Selected by latest signal basket | 0.1199999997687827 | 1.0466666666666666 | 0.12 | 0.12 | 0.0542363536652545 | 0.0616581114253153 |
-| CIBR | 5.90% | 19.832 | True | True | True | True | 33.91% | Selected by latest signal basket | 0.0958861813973966 | 1.1166666666666667 | 0.110323006251618 | 0.110323006251618 | 0.0518847259068151 | 0.0589846845342739 |
-| LIT | 5.17% | 7.083 | False | True | True | True | 34.45% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.045439789391688 | 0.0516578163559406 |
-| GLDM | 5.14% | -10.851 | False | False | False | False | 23.75% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0452166011270368 | 0.0514040867823114 |
-| TUR | 3.50% | 4.55 | False | False | True | True | 33.18% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0307769124931845 | 0.0349884564796552 |
-| AVDV | 3.47% | 8.208 | False | True | True | True | 19.39% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0305094419983747 | 0.0346843850504852 |
-| XAR | 3.33% | 12.402 | True | True | True | True | 31.91% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0292645961107567 | 0.0332691931863746 |
-| XLI | 3.32% | 15.488 | True | True | True | True | 20.84% | Selected by latest signal basket | 0.1199999985280309 | 0.9766666666666668 | 0.12 | 0.12 | 0.0291614667065292 | 0.0331519514496543 |
-| JETS | 3.32% | 19.11 | True | True | True | True | 38.30% | Selected by latest signal basket | 0.1115124502332595 | 1.07 | 0.12 | 0.12 | 0.0291614667065292 | 0.0331519514496543 |
-| KIE | 3.18% | 14.743 | True | True | True | True | 18.40% | Selected by latest signal basket | 0.1199999997485297 | 0.93 | 0.1149875187358022 | 0.1149875187358022 | 0.0279433724940041 | 0.0317671719870461 |
+| SGOV | 18.74% |  |  |  |  |  | n/a | Cash / risk-control sleeve | 0.0 |  | 0.0 | 0.0 | 0.1648714979530945 | 0.1874326885998144 |
+| EIS | 9.54% | 2.544 | False | False | True | True | 26.55% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0839590077225931 | 0.0954480473883681 |
+| EWT | 8.48% | 29.696 | True | True | True | True | 39.74% | Selected by latest signal basket | 0.1199999996305173 | 1.163333333333333 | 0.12 | 0.12 | 0.0746012686435701 | 0.0848097853687204 |
+| XBI | 7.68% | 22.747 | True | True | True | True | 28.81% | Selected by latest signal basket | 0.1199999999210474 | 1.14 | 0.12 | 0.12 | 0.0675558287563076 | 0.0768002400147159 |
+| OIH | 6.61% | -0.492 | False | False | False | True | 29.59% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0581146130850564 | 0.0660670783774221 |
+| EWY | 6.47% | 24.611 | False | True | True | True | 75.61% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0569333917882211 | 0.064724217505495 |
+| AVUV | 6.17% | 17.247 | True | True | True | True | 13.32% | Selected by latest signal basket | 0.1199999997680562 | 1.0466666666666666 | 0.12 | 0.12 | 0.0542363575054666 | 0.0616581181909467 |
+| CIBR | 5.90% | 19.832 | True | True | True | True | 33.91% | Selected by latest signal basket | 0.0958859249367311 | 1.1166666666666667 | 0.1103228443687406 | 0.1103228443687406 | 0.0518846902734772 | 0.058984646320695 |
+| LIT | 5.17% | 7.083 | False | True | True | True | 34.45% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0454398002749963 | 0.0516578307392111 |
+| GLDM | 5.14% | -10.851 | False | False | False | False | 23.75% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0452165963229037 | 0.0514040833215784 |
+| TUR | 3.50% | 4.55 | False | False | True | True | 33.18% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0307769418488444 | 0.0349884912142316 |
+| AVDV | 3.47% | 8.208 | False | True | True | True | 19.39% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0305094754138471 | 0.0346844243885877 |
+| XAR | 3.33% | 12.402 | True | True | True | True | 31.91% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0292646237703599 | 0.0332692259258851 |
+| XLI | 3.32% | 15.488 | True | True | True | True | 20.84% | Selected by latest signal basket | 0.1199999985233963 | 0.9766666666666668 | 0.12 | 0.12 | 0.0291614683685737 | 0.0331519546295093 |
+| JETS | 3.32% | 19.11 | True | True | True | True | 38.30% | Selected by latest signal basket | 0.1115129245770058 | 1.07 | 0.12 | 0.12 | 0.0291614683685737 | 0.0331519546295093 |
+| KIE | 3.18% | 14.743 | True | True | True | True | 18.40% | Selected by latest signal basket | 0.1199999997477472 | 0.93 | 0.1149876575556096 | 0.1149876575556096 | 0.0279434078215358 | 0.0317672133853093 |
 
 ## Cash / SGOV explanation
 
@@ -76,7 +76,7 @@ V5.16 is a monthly ETF allocation model. It starts with the Wealthfront ETF univ
 
 | Name | Total Return | CAGR | Annual Volatility | Sharpe | Max Drawdown |
 | --- | --- | --- | --- | --- | --- |
-| Strategy | 75.69% | 22.96% | 15.36% | 1.293 | -13.79% |
+| Strategy | 75.30% | 22.86% | 15.35% | 1.288 | -13.79% |
 | SPY | 81.41% | 24.42% | 15.62% | 1.348 | -18.76% |
 | QQQ | 101.25% | 29.24% | 20.58% | 1.252 | -22.77% |
 | VTI | 81.51% | 24.44% | 15.78% | 1.338 | -19.30% |
