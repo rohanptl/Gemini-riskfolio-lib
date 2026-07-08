@@ -1,6 +1,6 @@
 # V5.16 Allocation Explanation Report
 
-Generated at: `2026-07-07T01:16:09`
+Generated at: `2026-07-08T00:59:21`
 
 Output folder: `outputs_option2_v5_16_score_tilted_cvar`  
 Window folder: `outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023`  
@@ -36,22 +36,22 @@ V5.16 is a monthly ETF allocation model. It starts with the Wealthfront ETF univ
 
 | Ticker | FinalWeightPct | Score | AboveSMA50 | AboveSMA126 | PositiveMom63 | PositiveMom126 | Vol63AnnPct | SelectionBucket | OptimizerRawWeight | ScoreTiltMultiplier | RiskWeightAfterScoreTilt | CashScaledTargetWeight | WeightAfterTurnoverCapBeforePrune | WeightAfterPruningFinal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| SGOV | 18.74% |  |  |  |  |  | n/a | Cash / risk-control sleeve | 0.0 |  | 0.0 | 0.0 | 0.1648716113118322 | 0.1874328305993141 |
-| EIS | 9.54% | 2.55 | False | False | True | True | 26.55% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0839589982072028 | 0.0954480432564888 |
-| EWT | 8.48% | 29.698 | True | True | True | True | 39.74% | Selected by latest signal basket | 0.1199999996306005 | 1.163333333333333 | 0.12 | 0.12 | 0.074601277956268 | 0.0848098018962349 |
-| XBI | 7.68% | 22.751 | True | True | True | True | 28.81% | Selected by latest signal basket | 0.1199999999210669 | 1.14 | 0.12 | 0.12 | 0.0675558468311206 | 0.0768002659423388 |
-| OIH | 6.61% | -0.486 | False | False | False | True | 29.59% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0581146370014286 | 0.0660671101941713 |
-| EWY | 6.47% | 24.61 | False | True | True | True | 75.61% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.056933402831374 | 0.064724234593379 |
-| AVUV | 6.17% | 17.253 | True | True | True | True | 13.32% | Selected by latest signal basket | 0.119999999768115 | 1.0466666666666666 | 0.12 | 0.12 | 0.0542363658386334 | 0.0616581319832437 |
-| CIBR | 5.90% | 19.835 | True | True | True | True | 33.91% | Selected by latest signal basket | 0.0958859426558628 | 1.1166666666666667 | 0.110322818698574 | 0.110322818698574 | 0.0518846922197646 | 0.0589846526648628 |
-| LIT | 5.17% | 7.088 | False | True | True | True | 34.45% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0454398077435859 | 0.0516578428481564 |
-| GLDM | 5.14% | -10.844 | False | False | False | False | 23.75% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0452164050110379 | 0.0514038694309505 |
-| TUR | 3.50% | 4.556 | False | False | True | True | 33.18% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0307769201780114 | 0.0349884690286874 |
-| AVDV | 3.47% | 8.214 | False | True | True | True | 19.39% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0305094404398328 | 0.0346843870581415 |
-| XAR | 3.33% | 12.407 | True | True | True | True | 31.91% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0292646323857563 | 0.0332692380505474 |
-| XLI | 3.32% | 15.494 | True | True | True | True | 20.84% | Selected by latest signal basket | 0.119999998523684 | 0.9766666666666668 | 0.12 | 0.12 | 0.029161470212682 | 0.0331519590480785 |
-| JETS | 3.32% | 19.113 | True | True | True | True | 38.30% | Selected by latest signal basket | 0.1115127367978167 | 1.07 | 0.12 | 0.12 | 0.029161470212682 | 0.0331519590480785 |
-| KIE | 3.18% | 14.749 | True | True | True | True | 18.40% | Selected by latest signal basket | 0.1199999997478089 | 0.93 | 0.1149876095512382 | 0.1149876095512382 | 0.0279433979229662 | 0.0317672043573257 |
+| SGOV | 18.74% |  |  |  |  |  | n/a | Cash / risk-control sleeve | 0.0 |  | 0.0 | 0.0 | 0.164871479184601 | 0.1874326692544916 |
+| EIS | 9.54% | 2.549 | False | False | True | True | 26.55% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0839589682107113 | 0.0954480034837731 |
+| EWT | 8.48% | 29.696 | True | True | True | True | 39.74% | Selected by latest signal basket | 0.1199999996312146 | 1.163333333333333 | 0.12 | 0.12 | 0.0746012574532112 | 0.0848097735481644 |
+| XBI | 7.68% | 22.751 | True | True | True | True | 28.81% | Selected by latest signal basket | 0.119999999921218 | 1.14 | 0.12 | 0.12 | 0.0675558112243056 | 0.0768002208996181 |
+| OIH | 6.61% | -0.487 | False | False | False | True | 29.59% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0581148375204109 | 0.0660673342267136 |
+| EWY | 6.47% | 24.609 | False | True | True | True | 75.61% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0569333618741241 | 0.0647241841856154 |
+| AVUV | 6.17% | 17.252 | True | True | True | True | 13.32% | Selected by latest signal basket | 0.1199999997684997 | 1.0466666666666666 | 0.12 | 0.12 | 0.0542363538612984 | 0.0616581147032238 |
+| CIBR | 5.90% | 19.833 | True | True | True | True | 33.91% | Selected by latest signal basket | 0.0958862858357776 | 1.1166666666666667 | 0.1103229922806487 | 0.1103229922806487 | 0.0518847226952734 | 0.0589846838058362 |
+| LIT | 5.17% | 7.088 | False | True | True | True | 34.45% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0454397905920567 | 0.0516578202801118 |
+| GLDM | 5.14% | -10.844 | False | False | False | False | 23.75% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0452165867124066 | 0.0514040729421387 |
+| TUR | 3.50% | 4.555 | False | False | True | True | 33.18% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0307769178444111 | 0.0349884642967584 |
+| AVDV | 3.47% | 8.214 | False | True | True | True | 19.39% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0305094454798988 | 0.0346843907269677 |
+| XAR | 3.33% | 12.407 | True | True | True | True | 31.91% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0292646235287261 | 0.0332692260046712 |
+| XLI | 3.32% | 15.493 | True | True | True | True | 20.84% | Selected by latest signal basket | 0.119999998527489 | 0.9766666666666668 | 0.12 | 0.12 | 0.0291614668611545 | 0.0331519532680525 |
+| JETS | 3.32% | 19.113 | True | True | True | True | 38.30% | Selected by latest signal basket | 0.1115119210308254 | 1.07 | 0.12 | 0.12 | 0.0291614668611545 | 0.0331519532680525 |
+| KIE | 3.18% | 14.748 | True | True | True | True | 18.40% | Selected by latest signal basket | 0.1199999997482033 | 0.93 | 0.11498737892982 | 0.11498737892982 | 0.027943338667608 | 0.0317671351058103 |
 
 ## Cash / SGOV explanation
 
@@ -76,10 +76,10 @@ V5.16 is a monthly ETF allocation model. It starts with the Wealthfront ETF univ
 
 | Name | Total Return | CAGR | Annual Volatility | Sharpe | Max Drawdown |
 | --- | --- | --- | --- | --- | --- |
-| Strategy | 77.45% | 23.38% | 15.35% | 1.315 | -13.79% |
-| SPY | 82.99% | 24.77% | 15.62% | 1.367 | -18.76% |
-| QQQ | 104.14% | 29.87% | 20.58% | 1.276 | -22.77% |
-| VTI | 82.94% | 24.76% | 15.77% | 1.355 | -19.30% |
+| Strategy | 75.10% | 22.74% | 15.37% | 1.281 | -13.79% |
+| SPY | 82.12% | 24.52% | 15.61% | 1.354 | -18.76% |
+| QQQ | 100.35% | 28.94% | 20.60% | 1.240 | -22.77% |
+| VTI | 81.93% | 24.47% | 15.77% | 1.340 | -19.30% |
 
 ## Correlation / overlap context
 
@@ -87,26 +87,26 @@ The table below shows highly correlated final holdings if the strategy output fi
 
 | ETF 1 | ETF 2 | Correlation |
 | --- | --- | --- |
-| AVUV | XLI | 0.803 |
-| XAR | XLI | 0.795 |
-| EWT | EWY | 0.762 |
+| AVUV | XLI | 0.802 |
+| XAR | XLI | 0.796 |
+| EWT | EWY | 0.764 |
 | AVUV | JETS | 0.705 |
-| OIH | AVUV | 0.700 |
+| OIH | AVUV | 0.699 |
 | XLI | JETS | 0.694 |
-| AVDV | XLI | 0.685 |
-| EWT | AVDV | 0.669 |
+| AVDV | XLI | 0.686 |
+| EWT | AVDV | 0.670 |
 | AVUV | AVDV | 0.652 |
-| AVUV | XAR | 0.646 |
-| LIT | AVDV | 0.617 |
-| AVDV | XAR | 0.610 |
-| AVUV | KIE | 0.610 |
-| EWY | AVDV | 0.602 |
-| EWT | XLI | 0.583 |
-| AVDV | JETS | 0.572 |
-| XAR | JETS | 0.571 |
-| EWT | LIT | 0.571 |
-| XLI | KIE | 0.567 |
-| OIH | XLI | 0.559 |
+| AVUV | XAR | 0.645 |
+| LIT | AVDV | 0.618 |
+| AVDV | XAR | 0.613 |
+| AVUV | KIE | 0.609 |
+| EWY | AVDV | 0.604 |
+| EWT | XLI | 0.584 |
+| AVDV | JETS | 0.573 |
+| XAR | JETS | 0.573 |
+| EWT | LIT | 0.572 |
+| XLI | KIE | 0.564 |
+| OIH | XLI | 0.556 |
 
 ## How to explain this to a non-technical person
 
