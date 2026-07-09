@@ -1,4 +1,4 @@
-name: Monthly V5.16 ETF Allocation
+name: Monthly V5.16 ETF Allocation_fixed
 
 on:
   workflow_dispatch:
