@@ -1,0 +1,91 @@
+name: V5.16 Rolling As-Of ETF Allocation
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run after US market close every weekday.
+    # The script evaluates using the latest available close.
+    - cron: "30 23 * * 1-5"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: v516-rolling-asof-allocation
+  cancel-in-progress: false
+
+jobs:
+  run-v516-allocation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install pandas numpy yfinance riskfolio-lib openpyxl matplotlib
+          fi
+
+      - name: Run V5.16 rolling as-of allocation
+        run: |
+          python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --rebalance-mode rolling_asof_monthly
+
+      - name: Generate plain-English allocation explanation
+        run: |
+          python explain_v516_allocation_fixed.py \
+            --output-dir outputs_option2_v5_16_score_tilted_cvar \
+            --window 2023 \
+            --zip
+
+      - name: Get latest rebalance date
+        id: latest_rebalance
+        run: |
+          python .github/scripts/get_latest_rebalance_date.py
+
+      - name: Upload allocation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: v516-rolling-asof-${{ steps.latest_rebalance.outputs.latest_rebalance_date }}-${{ github.run_number }}
+          path: |
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_summary.csv
+            outputs_option2_v5_16_score_tilted_cvar/benchmark_comparison_by_window.csv
+            outputs_option2_v5_16_score_tilted_cvar/rolling_12m_summary_by_window.csv
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/final_target_weights_tradeable.csv
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/final_allocation_attribution.csv
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/allocation_attribution_by_rebalance.csv
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/final_portfolio_selection_reasons.csv
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/signal_cash_history.csv
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/turnover_by_rebalance.csv
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/benchmark_comparison.csv
+            outputs_option2_v5_16_score_tilted_cvar/allocation_explanation_reports/
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Commit updated allocation outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add outputs_option2_v5_16_score_tilted_cvar || true
+
+          if git diff --cached --quiet; then
+            echo "No allocation output changes to commit."
+          else
+            git commit -m "Update V5.16 rolling as-of ETF allocation - ${{ steps.latest_rebalance.outputs.latest_rebalance_date }}"
+            git pull --rebase
+            git push
+          fi
