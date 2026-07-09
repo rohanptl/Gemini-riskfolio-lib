@@ -1,4 +1,4 @@
-name: V5.16 Rolling As-Of ETF Allocation
+name: V5.16 Rolling As-Of ETF Allocation rolling
 
 on:
   workflow_dispatch:
