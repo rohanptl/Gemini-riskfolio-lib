@@ -3,8 +3,8 @@ name: V5.16 Rolling As-Of ETF Allocation rolling
 on:
   workflow_dispatch:
   schedule:
-    # Run after US market close every weekday.
-    # The script itself always evaluates using the latest available close.
+    # Run after US market close on the 1st of each month.
+    # Manual runs also evaluate using the latest available close.
     - cron: "30 23 1 * *"
 
 permissions:
@@ -54,25 +54,7 @@ jobs:
       - name: Get latest rebalance date
         id: latest_rebalance
         run: |
-          python - <<'PY'
-from pathlib import Path
-import os
-import pandas as pd
-
-weights_file = Path("outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/weights_by_rebalance.csv")
-github_output = Path(os.environ["GITHUB_OUTPUT"])
-
-if weights_file.exists():
-    weights = pd.read_csv(weights_file, index_col=0)
-    latest = str(pd.Timestamp(weights.index[-1]).date()) if not weights.empty else "unknown"
-else:
-    latest = "missing"
-
-with github_output.open("a", encoding="utf-8") as fh:
-    fh.write(f"latest_rebalance_date={latest}\n")
-
-print(f"Latest rebalance date: {latest}")
-PY
+          python .github/scripts/get_latest_rebalance_date.py
 
       - name: Upload allocation artifacts
         uses: actions/upload-artifact@v4
