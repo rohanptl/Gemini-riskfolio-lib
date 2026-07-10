@@ -7,71 +7,71 @@
     code { background: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
     pre { background: #111827; color: #f9fafb; padding: 14px; border-radius: 6px; overflow-x: auto; }
     </style></head><body><h1>V5.16 Allocation Explanation Report</h1>
-<p>Generated at: <code>2026-07-09T20:51:20</code></p>
+<p>Generated at: <code>2026-07-10T15:22:43</code></p>
 <p>Output folder: <code>outputs_option2_v5_16_score_tilted_cvar</code></p>
 <p>Window folder: <code>outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023</code></p>
 <p>Walk-forward window: <code>2023</code></p>
-<p>Latest rebalance date: <code>2026-07-09</code></p>
+<p>Latest rebalance date: <code>2026-07-10</code></p>
 <h2>One-paragraph explanation</h2>
 <p>V5.16 is a monthly ETF allocation model. It starts with the Wealthfront ETF universe, downloads price data, ranks ETFs using trend, momentum, and volatility signals, removes weak or highly correlated choices, uses Riskfolio&#x27;s CVaR optimizer to size the selected basket, modestly tilts weights toward higher-scoring ETFs, adds <code>SGOV</code> as a cash/T-bill sleeve when risk is elevated, applies a 20% monthly turnover cap, removes tiny positions, and then holds the final weights until the next monthly rebalance.</p>
 <h2>Final allocation and plain-English reasons</h2>
 <table>
 <thead><tr><th>Ticker</th><th>FinalWeightPct</th><th>WeightChangePct</th><th>SelectionBucket</th><th>PlainEnglishExplanation</th></tr></thead>
 <tbody>
-<tr><td>MLPA</td><td>11.31%</td><td>2.48%</td><td>Selected by latest signal basket</td><td>MLPA received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
-<tr><td>EIS</td><td>10.27%</td><td>-1.42%</td><td>Carryover / turnover-constrained holding</td><td>EIS is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
-<tr><td>EWT</td><td>9.70%</td><td>2.70%</td><td>Selected by latest signal basket</td><td>EWT received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
-<tr><td>XBI</td><td>7.66%</td><td>2.98%</td><td>Selected by latest signal basket</td><td>XBI received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
-<tr><td>OIH</td><td>7.58%</td><td>-1.04%</td><td>Carryover / turnover-constrained holding</td><td>OIH is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
-<tr><td>DIV</td><td>7.51%</td><td>-1.03%</td><td>Carryover / turnover-constrained holding</td><td>DIV is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
-<tr><td>EWY</td><td>6.21%</td><td>-0.86%</td><td>Carryover / turnover-constrained holding</td><td>EWY is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
-<tr><td>SMH</td><td>6.15%</td><td>-0.85%</td><td>Carryover / turnover-constrained holding</td><td>SMH is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
-<tr><td>GLDM</td><td>5.61%</td><td>-0.77%</td><td>Carryover / turnover-constrained holding</td><td>GLDM is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
-<tr><td>LIT</td><td>5.43%</td><td>-0.75%</td><td>Carryover / turnover-constrained holding</td><td>LIT is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
-<tr><td>TUR</td><td>5.20%</td><td>-0.72%</td><td>Carryover / turnover-constrained holding</td><td>TUR is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
-<tr><td>IXC</td><td>4.45%</td><td>-0.61%</td><td>Carryover / turnover-constrained holding</td><td>IXC is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
-<tr><td>CIBR</td><td>3.55%</td><td>3.55%</td><td>Selected by latest signal basket</td><td>CIBR received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
-<tr><td>AVUV</td><td>3.55%</td><td>3.55%</td><td>Selected by latest signal basket</td><td>AVUV received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
-<tr><td>KIE</td><td>3.55%</td><td>3.55%</td><td>Selected by latest signal basket</td><td>KIE received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
-<tr><td>SGOV</td><td>2.29%</td><td>-0.32%</td><td>Cash / risk-control sleeve</td><td>SGOV is the cash/T-bill sleeve. The model uses it when it does not want the full portfolio in risk ETFs, usually because market breadth is weaker or the selected ETF basket is too volatile.</td></tr>
+<tr><td>EIS</td><td>11.61%</td><td>-1.30%</td><td>Carryover / turnover-constrained holding</td><td>EIS is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>MLPA</td><td>10.65%</td><td>-1.19%</td><td>Carryover / turnover-constrained holding</td><td>MLPA is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>EWT</td><td>9.57%</td><td>2.63%</td><td>Selected by latest signal basket</td><td>EWT received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
+<tr><td>DIV</td><td>8.20%</td><td>-0.92%</td><td>Carryover / turnover-constrained holding</td><td>DIV is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>XBI</td><td>7.48%</td><td>2.86%</td><td>Selected by latest signal basket</td><td>XBI received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
+<tr><td>OIH</td><td>6.65%</td><td>-0.75%</td><td>Carryover / turnover-constrained holding</td><td>OIH is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>AVUV</td><td>6.58%</td><td>2.96%</td><td>Selected by latest signal basket</td><td>AVUV received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
+<tr><td>SMH</td><td>6.24%</td><td>-0.70%</td><td>Carryover / turnover-constrained holding</td><td>SMH is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>EWY</td><td>6.06%</td><td>-0.68%</td><td>Carryover / turnover-constrained holding</td><td>EWY is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>GLDM</td><td>5.57%</td><td>-0.62%</td><td>Carryover / turnover-constrained holding</td><td>GLDM is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>TUR</td><td>4.88%</td><td>-0.55%</td><td>Carryover / turnover-constrained holding</td><td>TUR is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>IXC</td><td>4.47%</td><td>-0.50%</td><td>Carryover / turnover-constrained holding</td><td>IXC is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>VTV</td><td>3.33%</td><td>3.33%</td><td>Selected by latest signal basket</td><td>VTV received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer.</td></tr>
+<tr><td>SPYD</td><td>3.25%</td><td>-0.37%</td><td>Carryover / turnover-constrained holding</td><td>SPYD is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>XLE</td><td>3.25%</td><td>-0.37%</td><td>Carryover / turnover-constrained holding</td><td>XLE is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold.</td></tr>
+<tr><td>SGOV</td><td>2.19%</td><td>-0.25%</td><td>Cash / risk-control sleeve</td><td>SGOV is the cash/T-bill sleeve. The model uses it when it does not want the full portfolio in risk ETFs, usually because market breadth is weaker or the selected ETF basket is too volatile.</td></tr>
 </tbody></table>
 <h2>Signal details behind each holding</h2>
 <table>
 <thead><tr><th>Ticker</th><th>FinalWeightPct</th><th>Score</th><th>AboveSMA50</th><th>AboveSMA126</th><th>PositiveMom63</th><th>PositiveMom126</th><th>Vol63AnnPct</th><th>SelectionBucket</th><th>OptimizerRawWeight</th><th>ScoreTiltMultiplier</th><th>RiskWeightAfterScoreTilt</th><th>CashScaledTargetWeight</th><th>WeightAfterTurnoverCapBeforePrune</th><th>WeightAfterPruningFinal</th></tr></thead>
 <tbody>
-<tr><td>MLPA</td><td>11.31%</td><td>13.987</td><td>True</td><td>True</td><td>True</td><td>True</td><td>15.07%</td><td>Selected by latest signal basket</td><td>0.1199999999421932</td><td>0.9066666666666668</td><td>0.12</td><td>0.12</td><td>0.0962779806531621</td><td>0.1130687471123456</td></tr>
-<tr><td>EIS</td><td>10.27%</td><td>-2.125</td><td>False</td><td>False</td><td>False</td><td>True</td><td>26.23%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0874787439969132</td><td>0.1027349339442937</td></tr>
-<tr><td>EWT</td><td>9.70%</td><td>30.118</td><td>True</td><td>True</td><td>True</td><td>True</td><td>39.84%</td><td>Selected by latest signal basket</td><td>0.1199999997916076</td><td>1.163333333333333</td><td>0.12</td><td>0.12</td><td>0.0825565802172926</td><td>0.0969543505973247</td></tr>
-<tr><td>XBI</td><td>7.66%</td><td>27.64</td><td>True</td><td>True</td><td>True</td><td>True</td><td>29.26%</td><td>Selected by latest signal basket</td><td>0.1199999999530853</td><td>1.1166666666666667</td><td>0.12</td><td>0.12</td><td>0.0652406670334234</td><td>0.0766185625435697</td></tr>
-<tr><td>OIH</td><td>7.58%</td><td>-0.93</td><td>False</td><td>False</td><td>False</td><td>True</td><td>29.97%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0645024584602818</td><td>0.0757516112645081</td></tr>
-<tr><td>DIV</td><td>7.51%</td><td>12.903</td><td>True</td><td>True</td><td>True</td><td>True</td><td>11.63%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0639222708363311</td><td>0.0750702396021079</td></tr>
-<tr><td>EWY</td><td>6.21%</td><td>23.777</td><td>False</td><td>True</td><td>True</td><td>True</td><td>74.36%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0528587112361293</td><td>0.062077208234904</td></tr>
-<tr><td>SMH</td><td>6.15%</td><td>28.159</td><td>True</td><td>True</td><td>True</td><td>True</td><td>50.38%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0523640187665963</td><td>0.0614962419811817</td></tr>
-<tr><td>GLDM</td><td>5.61%</td><td>-10.252</td><td>False</td><td>False</td><td>False</td><td>False</td><td>23.80%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0477847791145586</td><td>0.0561183883258551</td></tr>
-<tr><td>LIT</td><td>5.43%</td><td>-4.068</td><td>False</td><td>False</td><td>False</td><td>True</td><td>34.50%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.046268842802822</td><td>0.0543380745063574</td></tr>
-<tr><td>TUR</td><td>5.20%</td><td>-0.993</td><td>False</td><td>False</td><td>False</td><td>True</td><td>31.99%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0442546377655512</td><td>0.0519725944823005</td></tr>
-<tr><td>IXC</td><td>4.45%</td><td>2.944</td><td>False</td><td>False</td><td>False</td><td>True</td><td>23.36%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0379202662210783</td><td>0.0445335159991549</td></tr>
-<tr><td>CIBR</td><td>3.55%</td><td>27.383</td><td>True</td><td>True</td><td>True</td><td>True</td><td>34.51%</td><td>Selected by latest signal basket</td><td>0.1199999991077298</td><td>1.14</td><td>0.12</td><td>0.12</td><td>0.0301925614506963</td><td>0.035458108616143</td></tr>
-<tr><td>AVUV</td><td>3.55%</td><td>15.492</td><td>True</td><td>True</td><td>True</td><td>True</td><td>12.99%</td><td>Selected by latest signal basket</td><td>0.119999999605223</td><td>1.0466666666666666</td><td>0.12</td><td>0.12</td><td>0.0301925614506963</td><td>0.035458108616143</td></tr>
-<tr><td>KIE</td><td>3.55%</td><td>15.958</td><td>True</td><td>True</td><td>True</td><td>True</td><td>18.76%</td><td>Selected by latest signal basket</td><td>0.1199999997748127</td><td>0.9533333333333334</td><td>0.1199999999999999</td><td>0.1199999999999999</td><td>0.0301925614506963</td><td>0.035458108616143</td></tr>
-<tr><td>SGOV</td><td>2.29%</td><td></td><td></td><td></td><td></td><td></td><td>n/a</td><td>Cash / risk-control sleeve</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0194918498886242</td><td>0.0228912055576673</td></tr>
+<tr><td>EIS</td><td>11.61%</td><td>-2.573</td><td>False</td><td>False</td><td>False</td><td>True</td><td>26.13%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0986684337182893</td><td>0.1160877682572304</td></tr>
+<tr><td>MLPA</td><td>10.65%</td><td>11.9</td><td>True</td><td>True</td><td>True</td><td>True</td><td>15.17%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0904996168299083</td><td>0.1064767945533036</td></tr>
+<tr><td>EWT</td><td>9.57%</td><td>31.324</td><td>True</td><td>True</td><td>True</td><td>True</td><td>39.83%</td><td>Selected by latest signal basket</td><td>0.1199999994741144</td><td>1.163333333333333</td><td>0.12</td><td>0.12</td><td>0.0813725860835889</td><td>0.0957384399425427</td></tr>
+<tr><td>DIV</td><td>8.20%</td><td>12.101</td><td>True</td><td>True</td><td>True</td><td>True</td><td>11.65%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0697343502389348</td><td>0.0820455416695791</td></tr>
+<tr><td>XBI</td><td>7.48%</td><td>24.788</td><td>True</td><td>True</td><td>True</td><td>True</td><td>30.81%</td><td>Selected by latest signal basket</td><td>0.1199999997716499</td><td>1.1166666666666667</td><td>0.12</td><td>0.12</td><td>0.0635687000156185</td><td>0.0747913819823678</td></tr>
+<tr><td>OIH</td><td>6.65%</td><td>-2.325</td><td>False</td><td>False</td><td>False</td><td>True</td><td>30.03%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0565499306578443</td><td>0.0665334899701912</td></tr>
+<tr><td>AVUV</td><td>6.58%</td><td>15.234</td><td>True</td><td>True</td><td>True</td><td>True</td><td>13.00%</td><td>Selected by latest signal basket</td><td>0.119999999135967</td><td>1.0</td><td>0.12</td><td>0.12</td><td>0.0559487745350361</td><td>0.0658262032520274</td></tr>
+<tr><td>SMH</td><td>6.24%</td><td>29.442</td><td>True</td><td>True</td><td>True</td><td>True</td><td>50.34%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0530774593096103</td><td>0.0624479741272561</td></tr>
+<tr><td>EWY</td><td>6.06%</td><td>24.44</td><td>False</td><td>True</td><td>True</td><td>True</td><td>74.35%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0515419260780915</td><td>0.0606413514900632</td></tr>
+<tr><td>GLDM</td><td>5.57%</td><td>-9.948</td><td>False</td><td>False</td><td>False</td><td>False</td><td>23.72%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0473023287549272</td><td>0.05565327807075</td></tr>
+<tr><td>TUR</td><td>4.88%</td><td>-1.184</td><td>False</td><td>False</td><td>False</td><td>True</td><td>31.84%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0414739324069544</td><td>0.0487959124568743</td></tr>
+<tr><td>IXC</td><td>4.47%</td><td>1.094</td><td>False</td><td>False</td><td>False</td><td>True</td><td>23.34%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0379757381489724</td><td>0.0446801324750127</td></tr>
+<tr><td>VTV</td><td>3.33%</td><td>15.474</td><td>True</td><td>True</td><td>True</td><td>True</td><td>10.18%</td><td>Selected by latest signal basket</td><td>0.1199999988205932</td><td>1.0233333333333334</td><td>0.12</td><td>0.12</td><td>0.0282951267739785</td><td>0.0332904658152865</td></tr>
+<tr><td>SPYD</td><td>3.25%</td><td>13.066</td><td>True</td><td>True</td><td>True</td><td>True</td><td>11.52%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0276536477610576</td><td>0.0325357374367409</td></tr>
+<tr><td>XLE</td><td>3.25%</td><td>1.322</td><td>False</td><td>False</td><td>False</td><td>True</td><td>24.35%</td><td>Carryover / turnover-constrained holding</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0276536477610576</td><td>0.0325357374367409</td></tr>
+<tr><td>SGOV</td><td>2.19%</td><td></td><td></td><td></td><td></td><td></td><td>n/a</td><td>Cash / risk-control sleeve</td><td>0.0</td><td></td><td>0.0</td><td>0.0</td><td>0.0186306575118912</td><td>0.0219197910640326</td></tr>
 </tbody></table>
 <h2>Cash / SGOV explanation</h2>
 <table>
 <thead><tr><th>Item</th><th>Value</th><th>Plain English</th></tr></thead>
 <tbody>
-<tr><td>Final cash / SGOV weight</td><td>2.29%</td><td>How much of the portfolio is parked in the cash/T-bill sleeve.</td></tr>
-<tr><td>Signal breadth</td><td>78.51%</td><td>How broad the market strength was across the ETF universe.</td></tr>
+<tr><td>Final cash / SGOV weight</td><td>2.19%</td><td>How much of the portfolio is parked in the cash/T-bill sleeve.</td></tr>
+<tr><td>Signal breadth</td><td>79.04%</td><td>How broad the market strength was across the ETF universe.</td></tr>
 <tr><td>Breadth-driven cash</td><td>0.00%</td><td>Cash suggested because not enough ETFs had strong signals.</td></tr>
 <tr><td>Volatility-driven cash</td><td>0.00%</td><td>Cash suggested because the selected risk sleeve was too volatile.</td></tr>
-<tr><td>Active sleeve volatility</td><td>12.50%</td><td>Estimated annualized volatility of the selected ETF basket.</td></tr>
+<tr><td>Active sleeve volatility</td><td>14.76%</td><td>Estimated annualized volatility of the selected ETF basket.</td></tr>
 <tr><td>Eligible ETF count</td><td>15</td><td>Number of ETFs that passed the latest selection process.</td></tr>
 </tbody></table>
 <h2>Turnover explanation</h2>
 <table>
 <thead><tr><th>Item</th><th>Value</th><th>Plain English</th></tr></thead>
 <tbody>
-<tr><td>Latest turnover</td><td>18.79%</td><td>One-way movement at the latest rebalance.</td></tr>
+<tr><td>Latest turnover</td><td>11.78%</td><td>One-way movement at the latest rebalance.</td></tr>
 <tr><td>Turnover before pruning</td><td>20.00%</td><td>How much the model wanted to move before cleaning up tiny positions.</td></tr>
 <tr><td>Extra turnover from pruning</td><td>0.00%</td><td>Additional movement caused by removing very small positions.</td></tr>
 </tbody></table>
@@ -79,36 +79,36 @@
 <table>
 <thead><tr><th>Name</th><th>Total Return</th><th>CAGR</th><th>Annual Volatility</th><th>Sharpe</th><th>Max Drawdown</th></tr></thead>
 <tbody>
-<tr><td>Strategy</td><td>88.54%</td><td>26.15%</td><td>16.43%</td><td>1.374</td><td>-14.45%</td></tr>
-<tr><td>SPY</td><td>79.86%</td><td>23.99%</td><td>15.61%</td><td>1.327</td><td>-18.76%</td></tr>
-<tr><td>QQQ</td><td>100.47%</td><td>29.01%</td><td>20.61%</td><td>1.242</td><td>-22.77%</td></tr>
-<tr><td>VTI</td><td>79.64%</td><td>23.93%</td><td>15.77%</td><td>1.313</td><td>-19.30%</td></tr>
+<tr><td>Strategy</td><td>83.28%</td><td>24.85%</td><td>15.72%</td><td>1.363</td><td>-13.01%</td></tr>
+<tr><td>SPY</td><td>79.17%</td><td>23.81%</td><td>15.61%</td><td>1.318</td><td>-18.76%</td></tr>
+<tr><td>QQQ</td><td>99.34%</td><td>28.75%</td><td>20.61%</td><td>1.232</td><td>-22.77%</td></tr>
+<tr><td>VTI</td><td>78.65%</td><td>23.68%</td><td>15.77%</td><td>1.300</td><td>-19.30%</td></tr>
 </tbody></table>
 <h2>Correlation / overlap context</h2>
 <p>The table below shows highly correlated final holdings if the strategy output file exists. High correlation means two ETFs may move similarly, but it does not automatically mean one must be removed because the model also considers score, risk, and turnover.</p>
 <table>
 <thead><tr><th>ETF 1</th><th>ETF 2</th><th>Correlation</th></tr></thead>
 <tbody>
+<tr><td>IXC</td><td>XLE</td><td>0.976</td></tr>
+<tr><td>DIV</td><td>SPYD</td><td>0.902</td></tr>
+<tr><td>VTV</td><td>SPYD</td><td>0.858</td></tr>
+<tr><td>AVUV</td><td>VTV</td><td>0.838</td></tr>
+<tr><td>OIH</td><td>XLE</td><td>0.834</td></tr>
 <tr><td>OIH</td><td>IXC</td><td>0.834</td></tr>
+<tr><td>DIV</td><td>VTV</td><td>0.801</td></tr>
+<tr><td>AVUV</td><td>SPYD</td><td>0.785</td></tr>
 <tr><td>DIV</td><td>AVUV</td><td>0.779</td></tr>
 <tr><td>EWT</td><td>SMH</td><td>0.774</td></tr>
 <tr><td>EWT</td><td>EWY</td><td>0.764</td></tr>
 <tr><td>OIH</td><td>AVUV</td><td>0.697</td></tr>
+<tr><td>MLPA</td><td>XLE</td><td>0.684</td></tr>
 <tr><td>MLPA</td><td>IXC</td><td>0.683</td></tr>
-<tr><td>EWY</td><td>SMH</td><td>0.641</td></tr>
-<tr><td>DIV</td><td>KIE</td><td>0.634</td></tr>
-<tr><td>MLPA</td><td>DIV</td><td>0.613</td></tr>
-<tr><td>AVUV</td><td>KIE</td><td>0.609</td></tr>
-<tr><td>SMH</td><td>CIBR</td><td>0.605</td></tr>
-<tr><td>MLPA</td><td>OIH</td><td>0.602</td></tr>
-<tr><td>OIH</td><td>DIV</td><td>0.584</td></tr>
-<tr><td>DIV</td><td>IXC</td><td>0.584</td></tr>
-<tr><td>EWT</td><td>LIT</td><td>0.570</td></tr>
-<tr><td>IXC</td><td>AVUV</td><td>0.543</td></tr>
-<tr><td>XBI</td><td>AVUV</td><td>0.543</td></tr>
-<tr><td>EIS</td><td>SMH</td><td>0.537</td></tr>
-<tr><td>CIBR</td><td>AVUV</td><td>0.529</td></tr>
-<tr><td>EWT</td><td>CIBR</td><td>0.526</td></tr>
+<tr><td>SMH</td><td>EWY</td><td>0.641</td></tr>
+<tr><td>MLPA</td><td>DIV</td><td>0.612</td></tr>
+<tr><td>OIH</td><td>VTV</td><td>0.610</td></tr>
+<tr><td>MLPA</td><td>OIH</td><td>0.601</td></tr>
+<tr><td>DIV</td><td>OIH</td><td>0.584</td></tr>
+<tr><td>DIV</td><td>IXC</td><td>0.583</td></tr>
 </tbody></table>
 <h2>How to explain this to a non-technical person</h2>
 <ul>
