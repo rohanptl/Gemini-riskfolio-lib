@@ -1,11 +1,11 @@
 # V5.16 Allocation Explanation Report
 
-Generated at: `2026-07-21T17:39:51`
+Generated at: `2026-07-25T15:30:42`
 
 Output folder: `outputs_option2_v5_16_score_tilted_cvar`  
 Window folder: `outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023`  
 Walk-forward window: `2023`  
-Latest rebalance date: `2026-07-21`
+Latest rebalance date: `2026-07-24`
 
 ## One-paragraph explanation
 
@@ -15,71 +15,71 @@ V5.16 is a monthly ETF allocation model. It starts with the Wealthfront ETF univ
 
 | Ticker | FinalWeightPct | WeightChangePct | SelectionBucket | PlainEnglishExplanation |
 | --- | --- | --- | --- | --- |
-| SGOV | 17.77% | -1.31% | Cash / risk-control sleeve | SGOV is the cash/T-bill sleeve. The model uses it when it does not want the full portfolio in risk ETFs, usually because market breadth is weaker or the selected ETF basket is too volatile. |
-| EIS | 11.48% | -0.85% | Carryover / turnover-constrained holding | EIS is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| XBI | 10.47% | 2.71% | Selected by latest signal basket | XBI received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
-| LIT | 6.79% | -0.50% | Carryover / turnover-constrained holding | LIT is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| EWY | 6.32% | -0.47% | Carryover / turnover-constrained holding | EWY is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| MLPA | 6.30% | 3.02% | Selected by latest signal basket | MLPA received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
-| EWT | 5.91% | -0.44% | Carryover / turnover-constrained holding | EWT is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| OIH | 5.74% | -0.42% | Carryover / turnover-constrained holding | OIH is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| GLDM | 5.63% | -0.42% | Carryover / turnover-constrained holding | GLDM is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| EWW | 3.72% | -0.27% | Carryover / turnover-constrained holding | EWW is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| AVDV | 3.56% | -0.26% | Carryover / turnover-constrained holding | AVDV is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| XAR | 3.33% | -0.25% | Carryover / turnover-constrained holding | XAR is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| EWP | 3.26% | -0.24% | Carryover / turnover-constrained holding | EWP is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
-| SPYD | 3.24% | 3.24% | Selected by latest signal basket | SPYD received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
-| AVUV | 3.24% | 3.24% | Selected by latest signal basket | AVUV received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
-| THD | 3.24% | 3.24% | Selected by latest signal basket | THD received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
+| XBI | 11.75% | 1.69% | Selected by latest signal basket | XBI received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
+| SGOV | 10.70% | -1.78% | Cash / risk-control sleeve | SGOV is the cash/T-bill sleeve. The model uses it when it does not want the full portfolio in risk ETFs, usually because market breadth is weaker or the selected ETF basket is too volatile. |
+| EIS | 8.05% | -1.34% | Carryover / turnover-constrained holding | EIS is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
+| EWY | 7.85% | -1.30% | Carryover / turnover-constrained holding | EWY is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
+| OIH | 7.66% | -1.27% | Carryover / turnover-constrained holding | OIH is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
+| MLPA | 6.27% | 2.95% | Selected by latest signal basket | MLPA received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
+| SPYD | 6.19% | 2.96% | Selected by latest signal basket | SPYD received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
+| AVUV | 6.19% | 2.96% | Selected by latest signal basket | AVUV received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
+| EWT | 5.62% | -0.93% | Carryover / turnover-constrained holding | EWT is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
+| GLDM | 5.37% | -0.89% | Carryover / turnover-constrained holding | GLDM is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
+| IXC | 5.05% | -0.84% | Carryover / turnover-constrained holding | IXC is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
+| SMH | 5.05% | -0.84% | Carryover / turnover-constrained holding | SMH is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
+| LIT | 3.98% | -0.66% | Carryover / turnover-constrained holding | LIT is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold. |
+| THD | 3.42% | 3.42% | Selected by latest signal basket | THD received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
+| XOP | 3.42% | 3.42% | Selected by latest signal basket | XOP received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
+| KIE | 3.42% | 3.42% | Selected by latest signal basket | KIE received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer. |
 
 ## Signal details behind each holding
 
 | Ticker | FinalWeightPct | Score | AboveSMA50 | AboveSMA126 | PositiveMom63 | PositiveMom126 | Vol63AnnPct | SelectionBucket | OptimizerRawWeight | ScoreTiltMultiplier | RiskWeightAfterScoreTilt | CashScaledTargetWeight | WeightAfterTurnoverCapBeforePrune | WeightAfterPruningFinal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| SGOV | 17.77% |  |  |  |  |  | n/a | Cash / risk-control sleeve | 0.0 |  | 0.0 | 0.0 | 0.1479171467834028 | 0.1777114411515987 |
-| EIS | 11.48% | 0.065 | False | False | False | True | 26.38% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0955588266606679 | 0.1148068169912034 |
-| XBI | 10.47% | 19.261 | True | True | True | True | 30.50% | Selected by latest signal basket | 0.1067289512326055 | 1.1166666666666667 | 0.12 | 0.12 | 0.0871309704513236 | 0.1046813751114046 |
-| LIT | 6.79% | -14.215 | False | False | False | False | 35.15% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0564959938272555 | 0.0678757311147645 |
-| EWY | 6.32% | 13.365 | False | True | True | True | 78.39% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0526158724078015 | 0.063214054059135 |
-| MLPA | 6.30% | 17.634 | True | True | True | True | 15.51% | Selected by latest signal basket | 0.1199999998985533 | 1.0233333333333334 | 0.12 | 0.12 | 0.0523963891211389 | 0.0629503612281841 |
-| EWT | 5.91% | 21.439 | False | True | True | True | 42.51% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.049199689296989 | 0.0591097643465352 |
-| OIH | 5.74% | 2.363 | False | False | False | True | 30.01% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0477692283948708 | 0.0573911720537926 |
-| GLDM | 5.63% | -11.714 | False | False | False | False | 24.26% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0468960161750855 | 0.0563420725721992 |
-| EWW | 3.72% | 1.493 | False | False | False | True | 20.51% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0309255878269955 | 0.0371547917243383 |
-| AVDV | 3.56% | 8.579 | False | True | True | True | 18.62% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0296475197111324 | 0.0356192880204133 |
-| XAR | 3.33% | -7.221 | False | False | False | False | 32.11% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0276969807832798 | 0.0332758606935019 |
-| EWP | 3.26% | 14.292 | True | True | True | True | 19.55% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0271601121230919 | 0.0326308529619045 |
-| SPYD | 3.24% | 17.285 | True | True | True | True | 12.03% | Selected by latest signal basket | 0.1199999992872728 | 0.9766666666666668 | 0.12 | 0.12 | 0.0269780670216627 | 0.0324121393236747 |
-| AVUV | 3.24% | 18.077 | True | True | True | True | 12.82% | Selected by latest signal basket | 0.1171998125380367 | 1.07 | 0.12 | 0.12 | 0.0269780670216627 | 0.0324121393236747 |
-| THD | 3.24% | 17.472 | True | True | True | True | 21.98% | Selected by latest signal basket | 0.1199999983264029 | 1.0466666666666666 | 0.12 | 0.12 | 0.0269780670216627 | 0.0324121393236747 |
+| XBI | 11.75% | 17.474 | True | True | True | True | 30.46% | Selected by latest signal basket | 0.106400893730088 | 0.93 | 0.1094270919528046 | 0.1094270919528046 | 0.1028543567010932 | 0.1175216588960399 |
+| SGOV | 10.70% |  |  |  |  |  | n/a | Cash / risk-control sleeve | 0.0 |  | 0.0 | 0.0 | 0.0936846728217165 | 0.1070443539415366 |
+| EIS | 8.05% | 0.286 | False | False | False | True | 26.16% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0704663093798295 | 0.0805149907131851 |
+| EWY | 7.85% | 5.462 | False | True | True | True | 78.14% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0687224977120213 | 0.0785225069081611 |
+| OIH | 7.66% | 3.077 | False | False | False | True | 29.66% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.06700550916043 | 0.0765606712663814 |
+| MLPA | 6.27% | 20.028 | True | True | True | True | 15.48% | Selected by latest signal basket | 0.1199999995678443 | 1.1166666666666667 | 0.12 | 0.12 | 0.0548675088146634 | 0.0626917600985181 |
+| SPYD | 6.19% | 19.082 | True | True | True | True | 12.20% | Selected by latest signal basket | 0.1199999973891828 | 1.0466666666666666 | 0.12 | 0.12 | 0.0541595333751703 | 0.0618828254964702 |
+| AVUV | 6.19% | 17.971 | True | True | True | True | 12.99% | Selected by latest signal basket | 0.119999984839629 | 0.9533333333333334 | 0.12 | 0.12 | 0.0541595333751703 | 0.0618828254964702 |
+| EWT | 5.62% | 17.974 | False | True | True | True | 42.15% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0491450665367753 | 0.0561532824782784 |
+| GLDM | 5.37% | -11.285 | False | False | False | False | 24.00% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0470344904654756 | 0.0537417326997283 |
+| IXC | 5.05% | 21.067 | True | True | True | True | 22.87% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0442022728151421 | 0.0505056333520933 |
+| SMH | 5.05% | 14.357 | False | True | True | True | 53.24% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0442022728151421 | 0.0505056333520933 |
+| LIT | 3.98% | -15.815 | False | False | False | False | 34.40% | Carryover / turnover-constrained holding | 0.0 |  | 0.0 | 0.0 | 0.0348679142133427 | 0.0398401706259788 |
+| THD | 3.42% | 18.728 | True | True | True | True | 21.14% | Selected by latest signal basket | 0.1199999972425358 | 1.0233333333333334 | 0.12 | 0.12 | 0.0299409878265292 | 0.0342106515583549 |
+| XOP | 3.42% | 22.309 | True | True | True | True | 30.28% | Selected by latest signal basket | 0.1199999996439093 | 1.14 | 0.12 | 0.12 | 0.0299409878265292 | 0.0342106515583549 |
+| KIE | 3.42% | 19.758 | True | True | True | True | 20.11% | Selected by latest signal basket | 0.1199999993878799 | 1.07 | 0.12 | 0.12 | 0.0299409878265292 | 0.0342106515583549 |
 
 ## Cash / SGOV explanation
 
 | Item | Value | Plain English |
 | --- | --- | --- |
-| Final cash / SGOV weight | 17.77% | How much of the portfolio is parked in the cash/T-bill sleeve. |
-| Signal breadth | 76.09% | How broad the market strength was across the ETF universe. |
+| Final cash / SGOV weight | 10.70% | How much of the portfolio is parked in the cash/T-bill sleeve. |
+| Signal breadth | 70.82% | How broad the market strength was across the ETF universe. |
 | Breadth-driven cash | 0.00% | Cash suggested because not enough ETFs had strong signals. |
 | Volatility-driven cash | 0.00% | Cash suggested because the selected risk sleeve was too volatile. |
-| Active sleeve volatility | 8.58% | Estimated annualized volatility of the selected ETF basket. |
+| Active sleeve volatility | 8.69% | Estimated annualized volatility of the selected ETF basket. |
 | Eligible ETF count | 15 | Number of ETFs that passed the latest selection process. |
 
 ## Turnover explanation
 
 | Item | Value | Plain English |
 | --- | --- | --- |
-| Latest turnover | 15.45% | One-way movement at the latest rebalance. |
+| Latest turnover | 20.82% | One-way movement at the latest rebalance. |
 | Turnover before pruning | 20.00% | How much the model wanted to move before cleaning up tiny positions. |
-| Extra turnover from pruning | 0.00% | Additional movement caused by removing very small positions. |
+| Extra turnover from pruning | 0.82% | Additional movement caused by removing very small positions. |
 
 ## Performance context
 
 | Name | Total Return | CAGR | Annual Volatility | Sharpe | Max Drawdown |
 | --- | --- | --- | --- | --- | --- |
-| Strategy | 73.83% | 22.48% | 16.07% | 1.219 | -13.64% |
-| SPY | 83.86% | 25.03% | 15.58% | 1.383 | -18.76% |
-| QQQ | 103.33% | 29.73% | 20.67% | 1.266 | -22.77% |
-| VTI | 83.76% | 25.01% | 15.73% | 1.371 | -19.30% |
+| Strategy | 80.01% | 24.03% | 16.21% | 1.287 | -14.97% |
+| SPY | 80.42% | 24.13% | 15.59% | 1.336 | -18.76% |
+| QQQ | 93.57% | 27.37% | 20.70% | 1.176 | -22.77% |
+| VTI | 80.49% | 24.15% | 15.72% | 1.327 | -19.30% |
 
 ## Correlation / overlap context
 
@@ -87,26 +87,26 @@ The table below shows highly correlated final holdings if the strategy output fi
 
 | ETF 1 | ETF 2 | Correlation |
 | --- | --- | --- |
+| IXC | XOP | 0.916 |
+| OIH | IXC | 0.830 |
+| OIH | XOP | 0.815 |
 | SPYD | AVUV | 0.784 |
-| AVDV | EWP | 0.774 |
-| EWY | EWT | 0.763 |
+| EWT | SMH | 0.776 |
+| EWY | EWT | 0.759 |
 | OIH | AVUV | 0.695 |
-| EWT | AVDV | 0.671 |
-| AVDV | AVUV | 0.650 |
-| XAR | AVUV | 0.639 |
-| LIT | AVDV | 0.621 |
-| EWW | AVDV | 0.616 |
-| AVDV | XAR | 0.614 |
-| EWY | AVDV | 0.602 |
-| MLPA | OIH | 0.597 |
-| AVDV | SPYD | 0.579 |
-| AVDV | THD | 0.576 |
-| LIT | EWT | 0.574 |
-| EIS | AVDV | 0.549 |
-| EWW | EWP | 0.545 |
-| EWT | THD | 0.541 |
-| XBI | AVUV | 0.538 |
-| LIT | EWY | 0.530 |
+| MLPA | IXC | 0.682 |
+| MLPA | XOP | 0.669 |
+| SPYD | KIE | 0.655 |
+| EWY | SMH | 0.646 |
+| AVUV | KIE | 0.602 |
+| AVUV | XOP | 0.602 |
+| OIH | MLPA | 0.596 |
+| EWT | LIT | 0.573 |
+| EWT | THD | 0.539 |
+| AVUV | IXC | 0.539 |
+| XBI | AVUV | 0.537 |
+| EIS | SMH | 0.536 |
+| EWY | LIT | 0.530 |
 
 ## How to explain this to a non-technical person
 
