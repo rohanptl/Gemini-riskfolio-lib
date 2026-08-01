@@ -475,13 +475,35 @@ def make_benchmark_summary(data: dict[str, Any], benchmarks: list[str]) -> pd.Da
     bench = data["benchmark"]
     if bench.empty:
         return pd.DataFrame()
-    cols = [c for c in ["Total Return", "CAGR", "Annual Volatility", "Sharpe", "Max Drawdown"] if c in bench.columns]
+    percent_cols = {
+        "Total Return",
+        "CAGR",
+        "Annual Volatility",
+        "Max Drawdown",
+        "EV",
+    }
+    requested_cols = [
+        "Total Return",
+        "CAGR",
+        "Annual Volatility",
+        "Sharpe",
+        "Max Drawdown",
+        "EV",
+        "MAR",
+        "Calmar",
+        "PF",
+        "GtP",
+        "Sortino",
+    ]
+    cols = [c for c in requested_cols if c in bench.columns]
     rows = []
     for name in ["Strategy"] + benchmarks:
         if name in bench.index:
             r = {"Name": name}
             for c in cols:
-                r[c] = num(bench.loc[name, c]) if c == "Sharpe" else pct(bench.loc[name, c])
+                r[c] = pct(bench.loc[name, c], digits=4) if c == "EV" else (
+                    pct(bench.loc[name, c]) if c in percent_cols else num(bench.loc[name, c])
+                )
             rows.append(r)
     return pd.DataFrame(rows)
 
@@ -638,6 +660,17 @@ V5.16 is a monthly ETF allocation model. It starts with the Wealthfront ETF univ
 {markdown_table(turnover_summary)}
 
 ## Performance context
+
+| Measure | Short description |
+| --- | --- |
+| EV | Expected Value: the strategy's average return per trading day. Higher is better. |
+| MAR | Full-history CAGR divided by the absolute maximum drawdown. Higher means more return per unit of historical drawdown. |
+| Calmar | Annualized return over the latest three trading years divided by the maximum drawdown over that period. Higher is better. |
+| PF | Profit Factor: gross positive daily returns divided by gross negative daily returns. Above 1.0 means gains exceeded losses. |
+| GtP | Gain-to-Pain ratio: net daily returns divided by gross negative daily returns. Higher positive values indicate a better payoff relative to losses. |
+| Sortino | Annualized excess return divided by downside deviation. Higher means better return relative to harmful volatility. |
+
+### Strategy and benchmark comparison
 
 {markdown_table(benchmark_summary)}
 

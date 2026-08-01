@@ -1712,6 +1712,13 @@ def build_rebalance_allocation_attribution(
 # ============================================================
 
 def performance_stats(return_series: pd.Series, label: str) -> dict:
+    """Calculate annualized portfolio statistics from daily simple returns.
+
+    EV is daily return expectancy. MAR uses the full available history, while
+    Calmar uses at most the latest three trading years. PF is gross gains over
+    gross losses; GtP is net gains over gross losses. Sortino uses excess daily
+    returns and downside deviation relative to the configured risk-free rate.
+    """
     r = return_series.dropna()
 
     if r.empty:
@@ -1722,6 +1729,12 @@ def performance_stats(return_series: pd.Series, label: str) -> dict:
             "Annual Volatility": np.nan,
             "Sharpe": np.nan,
             "Max Drawdown": np.nan,
+            "EV": np.nan,
+            "MAR": np.nan,
+            "Calmar": np.nan,
+            "PF": np.nan,
+            "GtP": np.nan,
+            "Sortino": np.nan,
             "Daily Observations": 0,
         }
 
@@ -1739,8 +1752,46 @@ def performance_stats(return_series: pd.Series, label: str) -> dict:
         else np.nan
     )
 
-    drawdown = equity / equity.cummax() - 1
+    # Include the initial capital of 1.0 as a peak so an opening loss is
+    # correctly recognized as a drawdown.
+    drawdown = equity / equity.cummax().clip(lower=1.0) - 1
     max_drawdown = drawdown.min()
+
+    ev = r.mean()
+    gross_gains = r[r > 0].sum()
+    gross_losses = -r[r < 0].sum()
+    profit_factor = gross_gains / gross_losses if gross_losses > 0 else np.nan
+    gain_to_pain = r.sum() / gross_losses if gross_losses > 0 else np.nan
+
+    drawdown_magnitude = abs(max_drawdown)
+    mar = cagr / drawdown_magnitude if drawdown_magnitude > 0 else np.nan
+
+    calmar_returns = r.tail(3 * TRADING_DAYS)
+    calmar_equity = (1 + calmar_returns).cumprod()
+    calmar_years = len(calmar_returns) / TRADING_DAYS
+    calmar_annual_return = (
+        calmar_equity.iloc[-1] ** (1 / calmar_years) - 1
+        if calmar_years > 0
+        else np.nan
+    )
+    calmar_drawdown = (
+        calmar_equity / calmar_equity.cummax().clip(lower=1.0) - 1
+    )
+    calmar_max_drawdown = abs(calmar_drawdown.min())
+    calmar = (
+        calmar_annual_return / calmar_max_drawdown
+        if calmar_max_drawdown > 0
+        else np.nan
+    )
+
+    excess_returns = r - DAILY_RF
+    downside_returns = np.minimum(excess_returns, 0.0)
+    downside_deviation = np.sqrt(np.mean(np.square(downside_returns)))
+    sortino = (
+        excess_returns.mean() / downside_deviation * np.sqrt(TRADING_DAYS)
+        if downside_deviation > 0
+        else np.nan
+    )
 
     return {
         "Name": label,
@@ -1749,6 +1800,12 @@ def performance_stats(return_series: pd.Series, label: str) -> dict:
         "Annual Volatility": vol,
         "Sharpe": sharpe,
         "Max Drawdown": max_drawdown,
+        "EV": ev,
+        "MAR": mar,
+        "Calmar": calmar,
+        "PF": profit_factor,
+        "GtP": gain_to_pain,
+        "Sortino": sortino,
         "Daily Observations": len(r),
     }
 

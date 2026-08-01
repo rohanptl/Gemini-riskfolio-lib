@@ -1,0 +1,4 @@
+# Generated strategy reports. Keep these locally, but do not commit/push them.
+outputs_option2_v5_16_score_tilted_cvar/**/*.csv
+outputs_option2_v5_16_score_tilted_cvar/**/*.html
+outputs_option2_v5_16_score_tilted_cvar/**/*.md
