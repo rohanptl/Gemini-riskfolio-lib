@@ -1,8 +1,8 @@
 {
-  "created_at": "2026-08-01T14:23:10",
+  "created_at": "2026-08-02T01:03:52",
   "output_dir": "outputs_option2_v5_16_score_tilted_cvar",
   "window_name": "2023",
-  "window_dir": "outputs_option2_v5_16_score_tilted_cvar\\walk_forward_windows\\2023",
+  "window_dir": "outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023",
   "files_used": [
     "final_target_weights.csv",
     "final_target_weights_tradeable.csv",
@@ -22,97 +22,97 @@
   "final_holdings": [
     {
       "Ticker": "SGOV",
-      "FinalWeight": 0.1667302667838038,
+      "FinalWeight": 0.1667302799791676,
       "SelectionBucket": "Cash / risk-control sleeve",
       "PlainEnglishExplanation": "SGOV is the cash/T-bill sleeve. The model uses it when it does not want the full portfolio in risk ETFs, usually because market breadth is weaker or the selected ETF basket is too volatile."
     },
     {
       "Ticker": "AVUV",
-      "FinalWeight": 0.0874156153051582,
+      "FinalWeight": 0.087415636887185,
       "SelectionBucket": "Selected by latest signal basket",
       "PlainEnglishExplanation": "AVUV received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer."
     },
     {
       "Ticker": "EIS",
-      "FinalWeight": 0.0762814407615907,
+      "FinalWeight": 0.076281448710882,
       "SelectionBucket": "Carryover / turnover-constrained holding",
       "PlainEnglishExplanation": "EIS is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold."
     },
     {
       "Ticker": "EWT",
-      "FinalWeight": 0.0753523721660385,
+      "FinalWeight": 0.0753523797069481,
       "SelectionBucket": "Carryover / turnover-constrained holding",
       "PlainEnglishExplanation": "EWT is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold."
     },
     {
       "Ticker": "THD",
-      "FinalWeight": 0.0698586707309545,
+      "FinalWeight": 0.0698586679710893,
       "SelectionBucket": "Selected by latest signal basket",
       "PlainEnglishExplanation": "THD received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer."
     },
     {
       "Ticker": "EWY",
-      "FinalWeight": 0.0618389043267417,
+      "FinalWeight": 0.0618389164541482,
       "SelectionBucket": "Carryover / turnover-constrained holding",
       "PlainEnglishExplanation": "EWY is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold."
     },
     {
       "Ticker": "OIH",
-      "FinalWeight": 0.0616907195388287,
+      "FinalWeight": 0.061690882296398,
       "SelectionBucket": "Carryover / turnover-constrained holding",
       "PlainEnglishExplanation": "OIH is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold."
     },
     {
       "Ticker": "SPYD",
-      "FinalWeight": 0.0593850772397535,
+      "FinalWeight": 0.0593850841917626,
       "SelectionBucket": "Selected by latest signal basket",
       "PlainEnglishExplanation": "SPYD received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer."
     },
     {
       "Ticker": "XBI",
-      "FinalWeight": 0.0582525342777551,
+      "FinalWeight": 0.0582525342879456,
       "SelectionBucket": "Carryover / turnover-constrained holding",
       "PlainEnglishExplanation": "XBI is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold."
     },
     {
       "Ticker": "AVDV",
-      "FinalWeight": 0.0519492435969143,
+      "FinalWeight": 0.0519492560300168,
       "SelectionBucket": "Carryover / turnover-constrained holding",
       "PlainEnglishExplanation": "AVDV is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold."
     },
     {
       "Ticker": "CIBR",
-      "FinalWeight": 0.0497087705285067,
+      "FinalWeight": 0.0497085573348345,
       "SelectionBucket": "Selected by latest signal basket",
       "PlainEnglishExplanation": "CIBR received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer."
     },
     {
       "Ticker": "LIT",
-      "FinalWeight": 0.0450247736325222,
+      "FinalWeight": 0.0450247810281081,
       "SelectionBucket": "Carryover / turnover-constrained holding",
       "PlainEnglishExplanation": "LIT is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold."
     },
     {
       "Ticker": "GLDM",
-      "FinalWeight": 0.0383384170677293,
+      "FinalWeight": 0.0383383398480355,
       "SelectionBucket": "Carryover / turnover-constrained holding",
       "PlainEnglishExplanation": "GLDM is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold."
     },
     {
       "Ticker": "XLE",
-      "FinalWeight": 0.0336827090263615,
+      "FinalWeight": 0.0336827175337848,
       "SelectionBucket": "Carryover / turnover-constrained holding",
       "PlainEnglishExplanation": "XLE is likely a carryover holding. It may remain because V5.16 limits monthly turnover, so the portfolio does not fully replace old positions in one rebalance. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Carryover/kept holding from prior rebalance; still above pruning threshold."
     },
     {
       "Ticker": "MLPA",
-      "FinalWeight": 0.0322452425086702,
+      "FinalWeight": 0.0322452588698465,
       "SelectionBucket": "Selected by latest signal basket",
       "PlainEnglishExplanation": "MLPA received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer."
     },
     {
       "Ticker": "XOP",
-      "FinalWeight": 0.0322452425086702,
+      "FinalWeight": 0.0322452588698465,
       "SelectionBucket": "Selected by latest signal basket",
       "PlainEnglishExplanation": "XOP received an allocation because it passed the latest ETF selection process, survived the diversification/correlation filter, and then received a weight from CVaR risk sizing plus the score tilt. Main positives: above medium-term trend, above longer-term trend, positive 3-month momentum, positive 6-month momentum. Saved model note: Current eligible ETF selected by the V5.7/V5.9b signal layer."
     }
