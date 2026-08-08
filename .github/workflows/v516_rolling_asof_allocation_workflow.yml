@@ -40,9 +40,17 @@ jobs:
             pip install pandas numpy yfinance riskfolio-lib openpyxl matplotlib
           fi
 
-      - name: Run V5.16 rolling as-of allocation
+      - name: Run production V5.16 Mom126Skip21 allocation
         run: |
-          python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --rebalance-mode rolling_asof_monthly
+          python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py \
+            --end-date auto \
+            --rebalance-mode rolling_asof_monthly \
+            --sma50-eligibility hard \
+            --mom63-eligibility hard \
+            --short-momentum-score mom126_skip21 \
+            --relative-strength-score none \
+            --volatility-score total63 \
+            --output-dir outputs_option2_v5_16_score_tilted_cvar
 
       - name: Generate plain-English allocation explanation
         run: |
