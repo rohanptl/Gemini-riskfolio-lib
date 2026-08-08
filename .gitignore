@@ -2,3 +2,9 @@
 outputs_option2_v5_16_score_tilted_cvar/**/*.csv
 outputs_option2_v5_16_score_tilted_cvar/**/*.html
 outputs_option2_v5_16_score_tilted_cvar/**/*.md
+
+# Local experiment/regression artifacts.
+outputs_experiment_*/
+outputs_milestone_*/
+__pycache__/
+*.py[cod]

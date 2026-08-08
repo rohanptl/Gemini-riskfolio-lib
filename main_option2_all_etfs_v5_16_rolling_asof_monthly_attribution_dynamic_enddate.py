@@ -135,6 +135,21 @@ SCORE_TILT_STRENGTH = 0.35
 SCORE_TILT_MIN_MULTIPLIER = 0.70
 SCORE_TILT_MAX_MULTIPLIER = 1.30
 
+# Production momentum-score mode. "mom126_skip21" measures performance from
+# 126 trading days ago through 21 trading days ago and is the validated
+# production default. "raw21" remains available as an explicit rollback.
+SHORT_MOMENTUM_SCORE_MODE = "mom126_skip21"
+
+# Continuous benchmark-relative ranking experiment. Production default keeps
+# relative-strength columns diagnostic-only. "continuous_1_2" adds
+# 1.0 * ZScore(RS63VsSPY) + 2.0 * ZScore(RS126VsSPY).
+RELATIVE_STRENGTH_SCORE_MODE = "none"
+
+# Volatility ranking experiment. The hard 45% eligibility cap continues to use
+# total 63-day volatility in both modes. "downside63" changes only the score
+# penalty to annualized lower partial deviation around a 0% daily target.
+VOLATILITY_SCORE_MODE = "total63"
+
 # If strict rules produce fewer than MIN_ELIGIBLE_ASSETS,
 # the script falls back to the top-ranked assets by score.
 ALLOW_FALLBACK_TO_TOP_RANKED = True
@@ -431,8 +446,18 @@ def compute_asset_score_table(
     mom_21 = last_price / pseudo_prices.iloc[-min(21, len(pseudo_prices))] - 1
     mom_63 = last_price / pseudo_prices.iloc[-min(63, len(pseudo_prices))] - 1
     mom_126 = last_price / pseudo_prices.iloc[-min(126, len(pseudo_prices))] - 1
+    mom_126_skip_21 = (
+        pseudo_prices.iloc[-min(21, len(pseudo_prices))]
+        / pseudo_prices.iloc[-min(126, len(pseudo_prices))]
+        - 1
+    )
 
-    vol_63 = r.tail(min(63, len(r))).std() * np.sqrt(TRADING_DAYS)
+    trailing_returns_63 = r.tail(min(63, len(r)))
+    vol_63 = trailing_returns_63.std() * np.sqrt(TRADING_DAYS)
+    downside_vol_63 = (
+        trailing_returns_63.clip(upper=0.0).pow(2).mean().pow(0.5)
+        * np.sqrt(TRADING_DAYS)
+    )
 
     above_sma_50 = last_price > sma_50
     above_sma_126 = last_price > sma_126
@@ -461,26 +486,59 @@ def compute_asset_score_table(
     # Score uses only each ETF's own trend, momentum, and volatility.
     # Benchmark-relative metrics are kept as diagnostics only and are not used
     # for eligibility or scoring.
+    if SHORT_MOMENTUM_SCORE_MODE == "raw21":
+        short_momentum_score_signal = mom_21
+    elif SHORT_MOMENTUM_SCORE_MODE == "mom126_skip21":
+        short_momentum_score_signal = mom_126_skip_21
+    else:
+        raise ValueError(
+            f"Unsupported SHORT_MOMENTUM_SCORE_MODE={SHORT_MOMENTUM_SCORE_MODE!r}."
+        )
+
+    if RELATIVE_STRENGTH_SCORE_MODE == "none":
+        relative_strength_score = pd.Series(0.0, index=r.columns)
+    elif RELATIVE_STRENGTH_SCORE_MODE == "continuous_1_2":
+        relative_strength_score = (
+            1.00 * safe_zscore(rs_63)
+            + 2.00 * safe_zscore(rs_126)
+        )
+    else:
+        raise ValueError(
+            f"Unsupported RELATIVE_STRENGTH_SCORE_MODE={RELATIVE_STRENGTH_SCORE_MODE!r}."
+        )
+
+    if VOLATILITY_SCORE_MODE == "total63":
+        volatility_score_signal = vol_63
+    elif VOLATILITY_SCORE_MODE == "downside63":
+        volatility_score_signal = downside_vol_63
+    else:
+        raise ValueError(
+            f"Unsupported VOLATILITY_SCORE_MODE={VOLATILITY_SCORE_MODE!r}."
+        )
+
     score = (
         2.00 * above_sma_50.astype(float)
         + 3.00 * above_sma_126.astype(float)
         + 2.50 * positive_mom_63.astype(float)
         + 3.50 * positive_mom_126.astype(float)
-        + 1.50 * safe_zscore(mom_21)
+        + 1.50 * safe_zscore(short_momentum_score_signal)
         + 2.50 * safe_zscore(mom_63)
         + 3.50 * safe_zscore(mom_126)
-        - 2.00 * safe_zscore(vol_63)
+        - 2.00 * safe_zscore(volatility_score_signal)
+        + relative_strength_score
     )
 
     score_table = pd.DataFrame(
         {
             "Score": score,
             "Mom21": mom_21,
+            "Mom126Skip21": mom_126_skip_21,
             "Mom63": mom_63,
             "Mom126": mom_126,
             "RS63VsSPY": rs_63,
             "RS126VsSPY": rs_126,
             "Vol63Ann": vol_63,
+            "DownsideVol63Ann": downside_vol_63,
             "AboveSMA50": above_sma_50,
             "AboveSMA126": above_sma_126,
             "PositiveMom63": positive_mom_63,
@@ -1174,6 +1232,7 @@ def apply_score_tilt_to_weights(
     base_weights: pd.Series,
     train_returns: pd.DataFrame,
     eligible_assets: list[str],
+    benchmark_returns: pd.Series | None = None,
 ) -> pd.Series:
     """
     V5.16 score-aware sizing overlay.
@@ -1194,7 +1253,10 @@ def apply_score_tilt_to_weights(
     if base.sum() <= 0:
         return base
 
-    score_table = compute_asset_score_table(train_returns[eligible_assets])
+    score_table = compute_asset_score_table(
+        train_returns[eligible_assets],
+        benchmark_returns=benchmark_returns,
+    )
 
     if score_table.empty or "Score" not in score_table.columns:
         return base
@@ -1229,7 +1291,11 @@ def apply_score_tilt_to_weights(
     return tilted.reindex(eligible_assets).fillna(0.0)
 
 
-def optimize_winner_basket(train_returns: pd.DataFrame, eligible_assets: list[str]) -> pd.Series:
+def optimize_winner_basket(
+    train_returns: pd.DataFrame,
+    eligible_assets: list[str],
+    benchmark_returns: pd.Series | None = None,
+) -> pd.Series:
     """
     V5.16 production optimizer.
 
@@ -1256,6 +1322,7 @@ def optimize_winner_basket(train_returns: pd.DataFrame, eligible_assets: list[st
             base_weights=base,
             train_returns=r,
             eligible_assets=eligible_assets,
+            benchmark_returns=benchmark_returns,
         )
 
         return tilted.reindex(eligible_assets).fillna(0.0)
@@ -1351,6 +1418,7 @@ def apply_score_tilt_to_weights_with_attribution(
     train_returns: pd.DataFrame,
     eligible_assets: list[str],
     optimizer_attr: pd.DataFrame,
+    benchmark_returns: pd.Series | None = None,
 ) -> tuple[pd.Series, pd.DataFrame]:
     """
     Applies the V5.16 score-rank tilt and captures the intermediate math.
@@ -1378,7 +1446,10 @@ def apply_score_tilt_to_weights_with_attribution(
         attr["FinalRiskWeight"] = base.reindex(attr.index).fillna(0.0)
         return base, attr.reset_index()
 
-    score_table = compute_asset_score_table(train_returns[eligible_assets])
+    score_table = compute_asset_score_table(
+        train_returns[eligible_assets],
+        benchmark_returns=benchmark_returns,
+    )
 
     if score_table.empty or "Score" not in score_table.columns:
         attr["ScoreRankPct"] = np.nan
@@ -1435,6 +1506,7 @@ def apply_score_tilt_to_weights_with_attribution(
 def optimize_winner_basket_with_attribution(
     train_returns: pd.DataFrame,
     eligible_assets: list[str],
+    benchmark_returns: pd.Series | None = None,
 ) -> tuple[pd.Series, pd.DataFrame]:
     """
     V5.16 optimizer plus detailed attribution.
@@ -1476,6 +1548,7 @@ def optimize_winner_basket_with_attribution(
             train_returns=r,
             eligible_assets=eligible_assets,
             optimizer_attr=attr,
+            benchmark_returns=benchmark_returns,
         )
 
         attr["OptimizerUsed"] = "Classic_CVaR_Sharpe"
@@ -1653,11 +1726,13 @@ def build_rebalance_allocation_attribution(
                 "PositiveMom63": score_row.get("PositiveMom63", np.nan),
                 "PositiveMom126": score_row.get("PositiveMom126", np.nan),
                 "Mom21": score_row.get("Mom21", np.nan),
+                "Mom126Skip21": score_row.get("Mom126Skip21", np.nan),
                 "Mom63": score_row.get("Mom63", np.nan),
                 "Mom126": score_row.get("Mom126", np.nan),
                 "RS63VsSPY": score_row.get("RS63VsSPY", np.nan),
                 "RS126VsSPY": score_row.get("RS126VsSPY", np.nan),
                 "Vol63Ann": score_row.get("Vol63Ann", np.nan),
+                "DownsideVol63Ann": score_row.get("DownsideVol63Ann", np.nan),
 
                 # Optimizer and score tilt.
                 "OptimizerUsed": opt_row.get("OptimizerUsed", np.nan),
@@ -2180,11 +2255,13 @@ def build_final_portfolio_selection_reasons(
                     "Score": s.get("Score", np.nan),
                     "EligibleNow": ticker in latest_eligible_set,
                     "Mom21": s.get("Mom21", np.nan),
+                    "Mom126Skip21": s.get("Mom126Skip21", np.nan),
                     "Mom63": s.get("Mom63", np.nan),
                     "Mom126": s.get("Mom126", np.nan),
                     "RS63VsSPY": s.get("RS63VsSPY", np.nan),
                     "RS126VsSPY": s.get("RS126VsSPY", np.nan),
                     "Vol63Ann": s.get("Vol63Ann", np.nan),
+                    "DownsideVol63Ann": s.get("DownsideVol63Ann", np.nan),
                     "AboveSMA50": bool(s.get("AboveSMA50", False)),
                     "AboveSMA126": bool(s.get("AboveSMA126", False)),
                     "PositiveMom63": bool(s.get("PositiveMom63", False)),
@@ -2421,6 +2498,11 @@ def run_backtest_for_start_window(
         risk_weights, optimizer_attribution = optimize_winner_basket_with_attribution(
             train_returns=train_returns,
             eligible_assets=eligible_assets,
+            benchmark_returns=(
+                train_returns[MARKET_PROXY]
+                if MARKET_PROXY in train_returns.columns
+                else None
+            ),
         )
 
         active_sleeve_vol = estimate_active_sleeve_vol(
@@ -2685,12 +2767,21 @@ def run_backtest_for_start_window(
 
     strategy_row = benchmark_summary.loc["Strategy"].to_dict()
     strategy_row["StartWindow"] = start_date
-    strategy_row["StrategyVersion"] = "V5.16_rolling_asof_monthly_score_tilted_cvar_with_attribution"
+    strategy_row["StrategyVersion"] = "V5.16_mom126_skip21_score_tilted_cvar_with_attribution"
     strategy_row["CorrelationMode"] = globals().get("CORRELATION_MODE", "fast_slow")
     strategy_row["FastCorrLookbackDays"] = FAST_CORR_LOOKBACK_DAYS
     strategy_row["SlowCorrLookbackDays"] = SLOW_CORR_LOOKBACK_DAYS
     strategy_row["UseScoreTiltedCVaR"] = USE_SCORE_TILTED_CVAR
     strategy_row["ScoreTiltStrength"] = SCORE_TILT_STRENGTH
+    strategy_row["SMA50EligibilityMode"] = (
+        "hard" if REQUIRE_PRICE_ABOVE_SMA_50 else "score_only"
+    )
+    strategy_row["Mom63EligibilityMode"] = (
+        "hard" if REQUIRE_POSITIVE_63D_MOMENTUM else "score_only"
+    )
+    strategy_row["ShortMomentumScoreMode"] = SHORT_MOMENTUM_SCORE_MODE
+    strategy_row["RelativeStrengthScoreMode"] = RELATIVE_STRENGTH_SCORE_MODE
+    strategy_row["VolatilityScoreMode"] = VOLATILITY_SCORE_MODE
     strategy_row["RebalanceMode"] = REBALANCE_MODE
     strategy_row["IncludeLatestAsOfRebalance"] = INCLUDE_LATEST_ASOF_REBALANCE
     strategy_row["AverageTurnover"] = turnover_df["Turnover"].dropna().mean()
@@ -2808,6 +2899,76 @@ def parse_runtime_args() -> argparse.Namespace:
         ),
     )
 
+    parser.add_argument(
+        "--sma50-eligibility",
+        default=os.environ.get("STRATEGY_SMA50_ELIGIBILITY", "hard"),
+        choices=["hard", "score_only"],
+        help=(
+            "Control how SMA50 is used. 'hard' preserves V5.16 and requires "
+            "price above SMA50; 'score_only' keeps SMA50 in the score but removes "
+            "it from eligibility. Can also be set with STRATEGY_SMA50_ELIGIBILITY."
+        ),
+    )
+
+    parser.add_argument(
+        "--mom63-eligibility",
+        default=os.environ.get("STRATEGY_MOM63_ELIGIBILITY", "hard"),
+        choices=["hard", "score_only"],
+        help=(
+            "Control how 63-day momentum is used. 'hard' preserves V5.16 and "
+            "requires positive Mom63; 'score_only' keeps Mom63 in the score but "
+            "removes it from eligibility. Can also be set with "
+            "STRATEGY_MOM63_ELIGIBILITY."
+        ),
+    )
+
+    parser.add_argument(
+        "--short-momentum-score",
+        default=os.environ.get("STRATEGY_SHORT_MOMENTUM_SCORE", "mom126_skip21"),
+        choices=["raw21", "mom126_skip21"],
+        help=(
+            "Choose the signal used by the original 1.5-weight short-momentum "
+            "score component. 'mom126_skip21' is the production default and "
+            "uses 126-day momentum excluding the latest 21 days; 'raw21' is "
+            "the legacy rollback. Can also be set with "
+            "STRATEGY_SHORT_MOMENTUM_SCORE."
+        ),
+    )
+
+    parser.add_argument(
+        "--relative-strength-score",
+        default=os.environ.get("STRATEGY_RELATIVE_STRENGTH_SCORE", "none"),
+        choices=["none", "continuous_1_2"],
+        help=(
+            "Control continuous SPY-relative scoring. 'none' preserves V5.16; "
+            "'continuous_1_2' adds 1.0*ZScore(RS63) + 2.0*ZScore(RS126) "
+            "without adding a hard filter. Can also be set with "
+            "STRATEGY_RELATIVE_STRENGTH_SCORE."
+        ),
+    )
+
+    parser.add_argument(
+        "--volatility-score",
+        default=os.environ.get("STRATEGY_VOLATILITY_SCORE", "total63"),
+        choices=["total63", "downside63"],
+        help=(
+            "Choose the signal used by the -2.0 volatility score penalty. "
+            "'total63' preserves V5.16; 'downside63' uses annualized 63-day "
+            "lower partial deviation around zero. The hard volatility filter "
+            "still uses total volatility. Can also be set with "
+            "STRATEGY_VOLATILITY_SCORE."
+        ),
+    )
+
+    parser.add_argument(
+        "--output-dir",
+        default=os.environ.get("STRATEGY_OUTPUT_DIR"),
+        help=(
+            "Override the output directory so isolated experiments do not overwrite "
+            "production results. Can also be set with STRATEGY_OUTPUT_DIR."
+        ),
+    )
+
     return parser.parse_args()
 
 
@@ -2815,6 +2976,13 @@ def apply_runtime_overrides(args: argparse.Namespace) -> None:
     global END_DATE
     global REBALANCE_MODE
     global INCLUDE_LATEST_ASOF_REBALANCE
+    global REQUIRE_PRICE_ABOVE_SMA_50
+    global REQUIRE_POSITIVE_63D_MOMENTUM
+    global SHORT_MOMENTUM_SCORE_MODE
+    global RELATIVE_STRENGTH_SCORE_MODE
+    global VOLATILITY_SCORE_MODE
+    global OUTPUT_DIR
+    global WALK_FORWARD_OUTPUT_DIR
 
     resolved_end_date = resolve_end_date_argument(args.end_date)
 
@@ -2835,6 +3003,33 @@ def apply_runtime_overrides(args: argparse.Namespace) -> None:
         INCLUDE_LATEST_ASOF_REBALANCE = False
 
     print(f"Latest as-of final rebalance enabled: {INCLUDE_LATEST_ASOF_REBALANCE}")
+
+    sma50_eligibility = getattr(args, "sma50_eligibility", "hard")
+    REQUIRE_PRICE_ABOVE_SMA_50 = sma50_eligibility == "hard"
+    print(f"Runtime SMA50 eligibility mode: {sma50_eligibility}")
+
+    mom63_eligibility = getattr(args, "mom63_eligibility", "hard")
+    REQUIRE_POSITIVE_63D_MOMENTUM = mom63_eligibility == "hard"
+    print(f"Runtime Mom63 eligibility mode: {mom63_eligibility}")
+
+    SHORT_MOMENTUM_SCORE_MODE = getattr(
+        args,
+        "short_momentum_score",
+        "mom126_skip21",
+    )
+    print(f"Runtime short-momentum score mode: {SHORT_MOMENTUM_SCORE_MODE}")
+
+    RELATIVE_STRENGTH_SCORE_MODE = getattr(args, "relative_strength_score", "none")
+    print(f"Runtime relative-strength score mode: {RELATIVE_STRENGTH_SCORE_MODE}")
+
+    VOLATILITY_SCORE_MODE = getattr(args, "volatility_score", "total63")
+    print(f"Runtime volatility score mode: {VOLATILITY_SCORE_MODE}")
+
+    if getattr(args, "output_dir", None):
+        OUTPUT_DIR = Path(args.output_dir)
+        WALK_FORWARD_OUTPUT_DIR = OUTPUT_DIR / "walk_forward_windows"
+
+    print(f"Runtime output directory: {OUTPUT_DIR}")
 
 
 # ============================================================
@@ -2878,6 +3073,17 @@ def main() -> None:
     print(f"Latest as-of final rebalance enabled: {INCLUDE_LATEST_ASOF_REBALANCE}")
     print(f"V5.14 correlation mode: {CORRELATION_MODE}; fast={FAST_CORR_LOOKBACK_DAYS}d, slow={SLOW_CORR_LOOKBACK_DAYS}d")
     print(f"V5.16 score tilt: enabled={USE_SCORE_TILTED_CVAR}, strength={SCORE_TILT_STRENGTH}")
+    print(
+        "SMA50 eligibility: "
+        f"{'hard filter + score' if REQUIRE_PRICE_ABOVE_SMA_50 else 'score only'}"
+    )
+    print(
+        "Mom63 eligibility: "
+        f"{'hard filter + score' if REQUIRE_POSITIVE_63D_MOMENTUM else 'score only'}"
+    )
+    print(f"Short-momentum score component: {SHORT_MOMENTUM_SCORE_MODE}")
+    print(f"Relative-strength score component: {RELATIVE_STRENGTH_SCORE_MODE}")
+    print(f"Volatility score component: {VOLATILITY_SCORE_MODE}")
 
     prices = download_prices(
         download_tickers,

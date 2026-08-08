@@ -1,5 +1,18 @@
 python main_option2_all_etfs_v5_16_score_tilted_cvar_production_with_attribution.py
 
+Production rolling-as-of strategy (default short-momentum score is
+`mom126_skip21`):
+
+```powershell
+python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto
+```
+
+Legacy short-momentum rollback:
+
+```powershell
+python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --short-momentum-score raw21
+```
+
 python explain_v516_allocation_fixed.py \
   --output-dir outputs_option2_v5_16_score_tilted_cvar \
   --window 2023 \
@@ -219,7 +232,7 @@ flowchart TD
     A[Training returns window] --> B[Pseudo-price series]
     B --> C[SMA 50]
     B --> D[SMA 126]
-    B --> E[21-day momentum]
+    B --> E[126-to-21-day momentum]
     B --> F[63-day momentum]
     B --> G[126-day momentum]
     A --> H[63-day annualized volatility]
@@ -229,7 +242,7 @@ flowchart TD
     F --> K[Positive 63D momentum?]
     G --> L[Positive 126D momentum?]
 
-    E --> M[Z-score Mom21]
+    E --> M[Z-score Mom126Skip21]
     F --> N[Z-score Mom63]
     G --> O[Z-score Mom126]
     H --> P[Z-score Vol63]
@@ -254,7 +267,7 @@ Score =
 + 3.00 × AboveSMA126
 + 2.50 × PositiveMom63
 + 3.50 × PositiveMom126
-+ 1.50 × ZScore(Mom21)
++ 1.50 × ZScore(Mom126Skip21)
 + 2.50 × ZScore(Mom63)
 + 3.50 × ZScore(Mom126)
 - 2.00 × ZScore(Vol63)
@@ -268,6 +281,11 @@ Positive medium-term momentum
 Positive longer-term momentum
 Lower realized volatility
 ```
+
+`Mom126Skip21` is the return from approximately 126 trading days ago through
+21 trading days ago. Excluding the most recent month reduced short-term noise
+in the milestone walk-forward comparison. Raw 21-day momentum remains
+available through `--short-momentum-score raw21` for rollback and comparison.
 
 ---
 
