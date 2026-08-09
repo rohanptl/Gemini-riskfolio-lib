@@ -1,26 +1,231 @@
-python main_option2_all_etfs_v5_16_score_tilted_cvar_production_with_attribution.py
+# V5.16 ETF Rotation Strategy
 
-Production rolling-as-of strategy (default short-momentum score is
-`mom126_skip21`):
+The production strategy is a monthly rolling-as-of ETF allocation model using
+trend and momentum screening, correlation control, CVaR sizing, an SGOV cash
+sleeve, and turnover limits.
+
+## Latest production milestone
+
+The production short-momentum score now uses `mom126_skip21`: performance from
+approximately 126 trading days ago through 21 trading days ago. This replaces
+raw 21-day momentum in the 1.5-weight score component and avoids letting the
+most recent month's noise dominate that component.
+
+The pinned production configuration is:
+
+```text
+SMA50 eligibility       = hard
+Mom63 eligibility       = hard
+Short-momentum score    = mom126_skip21
+Relative-strength score = none
+Volatility score        = total63
+Rebalance mode          = rolling_asof_monthly
+```
+
+See `MILESTONE_MOM126_SKIP21.md` for the paired backtest comparison, rollback
+instructions, and known limitations.
+
+## Run from VS Code on Windows
+
+Open this repository in VS Code, then open **Terminal > New Terminal**. The
+commands below assume the terminal is PowerShell and its current directory is
+the repository root.
+
+### 1. Create and activate a virtual environment
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install pandas numpy yfinance riskfolio-lib openpyxl matplotlib
+```
+
+If PowerShell blocks activation, allow scripts only for the current terminal:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
+
+### 2. Run the production strategy
+
+Short command using the production defaults:
 
 ```powershell
 python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto
 ```
 
-Legacy short-momentum rollback:
+Fully pinned command matching GitHub Actions:
 
 ```powershell
-python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --short-momentum-score raw21
+python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --rebalance-mode rolling_asof_monthly --sma50-eligibility hard --mom63-eligibility hard --short-momentum-score mom126_skip21 --relative-strength-score none --volatility-score total63 --output-dir outputs_option2_v5_16_score_tilted_cvar
 ```
 
-python explain_v516_allocation_fixed.py \
-  --output-dir outputs_option2_v5_16_score_tilted_cvar \
-  --window 2023 \
-  --zip
-  
+### 3. Generate the allocation explanation package
 
+Run this after the strategy completes:
 
-Below is a clean explanation of **V5.16 production script** using block and sequence diagrams.
+```powershell
+python explain_v516_allocation_fixed.py --output-dir outputs_option2_v5_16_score_tilted_cvar --window 2023 --zip
+```
+
+Important production outputs include:
+
+```text
+outputs_option2_v5_16_score_tilted_cvar/walk_forward_summary.csv
+outputs_option2_v5_16_score_tilted_cvar/benchmark_comparison_by_window.csv
+outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/final_target_weights_tradeable.csv
+outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/final_allocation_attribution.csv
+outputs_option2_v5_16_score_tilted_cvar/allocation_explanation_reports/
+```
+
+## Rollback and experiment commands
+
+Each command writes to a separate directory so it does not overwrite the
+production reports.
+
+Legacy raw 21-day momentum rollback:
+
+```powershell
+python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --short-momentum-score raw21 --output-dir outputs_manual_raw21
+```
+
+Standalone continuous SPY-relative-strength experiment:
+
+```powershell
+python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --short-momentum-score raw21 --relative-strength-score continuous_1_2 --output-dir outputs_manual_relative_strength
+```
+
+Combined production momentum plus relative strength:
+
+```powershell
+python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --short-momentum-score mom126_skip21 --relative-strength-score continuous_1_2 --output-dir outputs_manual_combined
+```
+
+Downside-volatility scoring experiment:
+
+```powershell
+python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --short-momentum-score raw21 --volatility-score downside63 --output-dir outputs_manual_downside_volatility
+```
+
+SMA50 score-only experiment:
+
+```powershell
+python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --sma50-eligibility score_only --short-momentum-score raw21 --output-dir outputs_manual_sma50_score_only
+```
+
+Mom63 score-only experiment:
+
+```powershell
+python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --mom63-eligibility score_only --short-momentum-score raw21 --output-dir outputs_manual_mom63_score_only
+```
+
+Standalone ATR-adjusted reversal sleeve candidate (fast default):
+
+```powershell
+python experiment_oversold_reversal_sleeve.py
+```
+
+The first run creates ignored local OHLCV and indicator caches under
+`outputs_experiment_market_data_cache/`. Later candidate runs reuse them.
+Refresh market data and both caches when testing a new end date:
+
+```powershell
+python experiment_oversold_reversal_sleeve.py --refresh-data
+```
+
+Run the focused ATR threshold comparison or every historical sleeve variant:
+
+```powershell
+python experiment_oversold_reversal_sleeve.py --variant-suite atr --output-dir outputs_experiment_oversold_reversal_sleeve_v4_atr
+python experiment_oversold_reversal_sleeve.py --variant-suite entry --output-dir outputs_experiment_oversold_reversal_sleeve_v5_early_probe
+python experiment_oversold_reversal_sleeve.py --variant-suite exit --output-dir outputs_experiment_oversold_reversal_sleeve_v6_atr_profit_stop
+python experiment_oversold_reversal_sleeve.py --variant-suite full --output-dir outputs_experiment_oversold_reversal_sleeve_full
+```
+
+The `entry` suite compares the confirmed 5% sleeve with an experimental
+staged entry: a 2.5% deep-washout probe followed by an add to 5% only after
+the ATR-adjusted confirmation signal.
+
+The `exit` suite keeps the confirmed ATR-1.25 entries unchanged and compares
+profit-activated chandelier exits using the highest post-entry daily high and
+several ATR trailing distances. A breached stop is acted on the next session,
+consistent with the backtest's signal timing.
+
+The indicator cache invalidates automatically when indicator or signal code
+changes. These sleeve commands do not modify production outputs.
+
+### Modular AWB sleeve backtests
+
+The universe-wide weekly strategy uses the modular `awb_sleeves` package:
+
+```text
+awb_sleeves/config.py                 strategy and execution settings
+awb_sleeves/data.py                   ETF universe, download, and cache loading
+awb_sleeves/indicators.py             daily execution and weekly signal features
+awb_sleeves/strategies/daily_awb.py   daily AWB signal definition
+awb_sleeves/strategies/weekly_awb.py  weekly washout-base signal and ranking
+awb_sleeves/backtest.py               next-open execution and ATR exits
+awb_sleeves/reporting.py              CSV summaries and trade statistics
+awb_sleeves/visuals.py                equity, drawdown, and trade charts
+```
+
+Run the independent Weekly ATR-Confirmed Washout Base ETF Sleeve across all
+eligible risk ETFs:
+
+```powershell
+python run_weekly_awb_backtest.py
+```
+
+Test an immediately active three-ATR initial-loss stop in addition to the
+profit-protection stop:
+
+```powershell
+python run_weekly_awb_backtest.py --initial-stop-atr 3.0 --output-dir outputs_experiment_weekly_awb_sleeve_v2_risk_stop
+```
+
+Optionally test weekly replacement after a holding has aged at least 30 trading
+days:
+
+```powershell
+python run_weekly_awb_backtest.py --replacement-min-holding-days 30 --output-dir outputs_experiment_weekly_awb_sleeve_v2_replacement
+```
+
+The weekly runner reports the sleeve as a standalone strategy and as a 5%
+overlay on the production baseline. Signals are evaluated on completed weekly
+bars, while entries and exits execute at the next available adjusted open.
+
+Run Weekly AWB as a completely independent portfolio with two fixed 50% slots,
+unused capital earning the configured cash return, and direct comparisons with
+SPY, QQQ, VTI, and the production strategy:
+
+```powershell
+python run_weekly_awb_strategy.py --max-positions 2 --output-dir outputs_experiment_weekly_awb_strategy_v1_max2
+```
+
+The independent strategy uses both an immediately active three-ATR initial
+risk stop and the profit-activated three-ATR trailing stop. Position slots are
+fixed at `1 / max_positions`; the strategy does not increase the size of a lone
+position merely because other slots are empty.
+
+## GitHub Actions
+
+`.github/workflows/v516_rolling_asof_allocation_workflow.yml` explicitly pins
+the production configuration rather than relying on changing code defaults.
+It can be started manually with **Run workflow** in GitHub Actions and is also
+scheduled for 23:30 UTC on the first day of each month.
+
+Pushing code does not automatically run this workflow. If GitHub CLI is
+installed and authenticated, it can be dispatched from the VS Code terminal:
+
+```powershell
+gh workflow run v516_rolling_asof_allocation_workflow.yml --ref main
+```
+
+## Strategy details
+
+Below is a detailed explanation of the V5.16 production script using block and
+sequence diagrams.
 
 You can paste the Mermaid diagrams into a Mermaid viewer such as `mermaid.live`.
 
