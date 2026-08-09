@@ -1,0 +1,47 @@
+name: V5.16 Mid-Month Monitor Only
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Friday after the US close. This job never creates a new target or trades.
+    - cron: "30 23 * * 5"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v516-midmonth-monitor
+  cancel-in-progress: true
+
+jobs:
+  monitor-locked-target:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install monitor dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy yfinance
+
+      - name: Monitor locked monthly target
+        run: |
+          python monitor_v516_midmonth.py \
+            --lock-dir live_targets/v516 \
+            --output-dir outputs_monitor_v516 \
+            --as-of auto
+
+      - name: Upload monitor-only report
+        uses: actions/upload-artifact@v4
+        with:
+          name: v516-midmonth-monitor-${{ github.run_number }}
+          path: outputs_monitor_v516/
+          if-no-files-found: error
+          retention-days: 90

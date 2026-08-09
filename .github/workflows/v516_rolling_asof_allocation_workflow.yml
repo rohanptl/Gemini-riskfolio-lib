@@ -2,6 +2,12 @@ name: V5.16 Rolling As-Of ETF Allocation rolling
 
 on:
   workflow_dispatch:
+    inputs:
+      replace_official_target:
+        description: "Replace an existing official target for the same month (recovery only)"
+        required: false
+        default: false
+        type: boolean
   schedule:
     # Run after US market close on the 1st of each month.
     # Manual runs also evaluate using the latest available close.
@@ -30,7 +36,27 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Check official monthly target guard
+        id: target_guard
+        shell: bash
+        run: |
+          EXTRA_ARGS=()
+          if [[ "${{ inputs.replace_official_target }}" == "true" ]]; then
+            EXTRA_ARGS+=(--replace-official-target)
+          fi
+
+          python check_v516_monthly_target_guard.py \
+            --lock-dir live_targets/v516 \
+            --current-month "$(date -u +%Y-%m)" \
+            "${EXTRA_ARGS[@]}"
+
+      - name: Report protected same-month skip
+        if: steps.target_guard.outputs.should_run != 'true'
+        run: |
+          echo "No new target was calculated or published. Use the existing locked target and the monitor-only workflow."
+
       - name: Install dependencies
+        if: steps.target_guard.outputs.should_run == 'true'
         run: |
           python -m pip install --upgrade pip
 
@@ -41,6 +67,7 @@ jobs:
           fi
 
       - name: Run production V5.16 Mom126Skip21 allocation
+        if: steps.target_guard.outputs.should_run == 'true'
         run: |
           python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py \
             --end-date auto \
@@ -53,6 +80,7 @@ jobs:
             --output-dir outputs_option2_v5_16_score_tilted_cvar
 
       - name: Generate plain-English allocation explanation
+        if: steps.target_guard.outputs.should_run == 'true'
         run: |
           python explain_v516_allocation_fixed.py \
             --output-dir outputs_option2_v5_16_score_tilted_cvar \
@@ -60,11 +88,33 @@ jobs:
             --zip
 
       - name: Get latest rebalance date
+        if: steps.target_guard.outputs.should_run == 'true'
         id: latest_rebalance
         run: |
           python .github/scripts/get_latest_rebalance_date.py
 
+      - name: Lock official monthly live target
+        if: steps.target_guard.outputs.should_run == 'true'
+        id: lock_target
+        shell: bash
+        run: |
+          EXTRA_ARGS=()
+          if [[ "${{ inputs.replace_official_target }}" == "true" ]]; then
+            EXTRA_ARGS+=(--replace-same-month)
+          fi
+
+          python lock_v516_monthly_target.py \
+            --output-dir outputs_option2_v5_16_score_tilted_cvar \
+            --window 2023 \
+            --lock-dir live_targets/v516 \
+            --official-month "$(date -u +%Y-%m)" \
+            --source-commit "${{ github.sha }}" \
+            --source-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --source-artifact "v516-rolling-asof-${{ steps.latest_rebalance.outputs.latest_rebalance_date }}-${{ github.run_number }}" \
+            "${EXTRA_ARGS[@]}"
+
       - name: Upload allocation artifacts
+        if: steps.target_guard.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: v516-rolling-asof-${{ steps.latest_rebalance.outputs.latest_rebalance_date }}-${{ github.run_number }}
@@ -80,15 +130,17 @@ jobs:
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/turnover_by_rebalance.csv
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/benchmark_comparison.csv
             outputs_option2_v5_16_score_tilted_cvar/allocation_explanation_reports/
+            live_targets/v516/
           if-no-files-found: warn
           retention-days: 90
 
       - name: Commit updated allocation outputs
+        if: steps.target_guard.outputs.should_run == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add outputs_option2_v5_16_score_tilted_cvar || true
+          git add outputs_option2_v5_16_score_tilted_cvar live_targets/v516 || true
 
           if git diff --cached --quiet; then
             echo "No allocation output changes to commit."
