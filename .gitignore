@@ -6,5 +6,6 @@ outputs_option2_v5_16_score_tilted_cvar/**/*.md
 # Local experiment/regression artifacts.
 outputs_experiment_*/
 outputs_milestone_*/
+outputs_monitor_v516/
 __pycache__/
 *.py[cod]
