@@ -53,11 +53,16 @@ class V516TargetLockTests(unittest.TestCase):
                 lock_dir,
                 source_run_url="https://example.test/run/1",
                 locked_at_utc="2026-08-09T18:00:00+00:00",
+                allocation_submitted_date_override="2026-08-09",
+                live_effective_date_override="2026-08-10",
             )
             metadata = json.loads(
                 (lock_dir / "current_target.json").read_text(encoding="utf-8")
             )
             self.assertEqual(metadata["official_month"], "2026-08")
+            self.assertEqual(metadata["source_signal_date"], "2026-08-07")
+            self.assertEqual(metadata["allocation_submitted_date"], "2026-08-09")
+            self.assertEqual(metadata["live_effective_date"], "2026-08-10")
             self.assertEqual(metadata["next_scheduled_rebalance_date"], "2026-09-01")
             self.assertEqual(metadata["source_run_url"], "https://example.test/run/1")
 
@@ -103,6 +108,46 @@ class V516TargetLockTests(unittest.TestCase):
 
 
 class V516MonitorTests(unittest.TestCase):
+    def test_monitor_waits_until_live_effective_date(self) -> None:
+        weights = pd.Series([1.0], index=pd.Index(["AAA"], name="Ticker"))
+        metadata = {
+            "official_month": "2026-08",
+            "source_signal_date": "2026-08-07",
+            "rebalance_date": "2026-08-07",
+            "allocation_submitted_date": "2026-08-09",
+            "live_effective_date": "2026-08-10",
+            "next_scheduled_rebalance_date": "2026-09-01",
+        }
+        result = build_monitor_result(
+            weights,
+            metadata,
+            pd.DataFrame(columns=["AAA"], dtype=float),
+            pd.Timestamp("2026-08-09"),
+        )
+        self.assertEqual(result.status, "PENDING_EFFECTIVE_DATE_NO_TRADE")
+        self.assertEqual(result.summary["live_effective_date"], "2026-08-10")
+
+    def test_monitor_uses_live_effective_price_as_baseline(self) -> None:
+        weights = pd.Series([1.0], index=pd.Index(["AAA"], name="Ticker"))
+        metadata = {
+            "official_month": "2026-08",
+            "source_signal_date": "2026-08-07",
+            "rebalance_date": "2026-08-07",
+            "allocation_submitted_date": "2026-08-09",
+            "live_effective_date": "2026-08-10",
+            "next_scheduled_rebalance_date": "2026-09-01",
+        }
+        prices = pd.DataFrame(
+            {"AAA": [90.0, 100.0, 110.0]},
+            index=pd.to_datetime(["2026-08-07", "2026-08-10", "2026-08-11"]),
+        )
+        result = build_monitor_result(
+            weights, metadata, prices, pd.Timestamp("2026-08-11")
+        )
+        self.assertAlmostEqual(
+            result.summary["estimated_portfolio_return_since_lock"], 0.10
+        )
+
     def test_monitor_reports_drift_without_changing_target(self) -> None:
         weights = pd.Series(
             [0.5, 0.5], index=pd.Index(["AAA", "BBB"], name="Ticker")

@@ -104,10 +104,57 @@ def build_monitor_result(
 ) -> MonitorResult:
     tickers = locked_weights.index.astype(str).str.upper().tolist()
     prices = prices.reindex(columns=tickers).sort_index()
-    lock_date = pd.Timestamp(str(metadata["rebalance_date"])).normalize()
+    source_signal_date = pd.Timestamp(
+        str(metadata.get("source_signal_date", metadata["rebalance_date"]))
+    ).normalize()
+    lock_date = pd.Timestamp(
+        str(metadata.get("live_effective_date", metadata["rebalance_date"]))
+    ).normalize()
     as_of_date = pd.Timestamp(as_of_date).normalize()
     if as_of_date < lock_date:
-        raise ValueError("Monitor as-of date cannot precede the locked target date.")
+        drift = pd.DataFrame(
+            {
+                "LockedTargetWeight": locked_weights,
+                "EstimatedCurrentWeight": np.nan,
+                "EstimatedDriftPercentagePoints": np.nan,
+                "LockedAdjustedClose": np.nan,
+                "LatestAdjustedClose": np.nan,
+                "ReturnSinceLock": np.nan,
+            }
+        )
+        drift.index.name = "Ticker"
+        summary = {
+            "status": "PENDING_EFFECTIVE_DATE_NO_TRADE",
+            "policy": "NO_TRADE_MONITOR_ONLY",
+            "official_month": metadata["official_month"],
+            "source_signal_date": str(source_signal_date.date()),
+            "allocation_submitted_date": metadata.get("allocation_submitted_date"),
+            "live_effective_date": str(lock_date.date()),
+            "monitor_as_of_date": str(as_of_date.date()),
+            "latest_common_price_date": None,
+            "calendar_days_stale": None,
+            "missing_tickers": [],
+            "drift_source": "EstimatedCurrentWeight",
+            "max_absolute_drift_percentage_points": None,
+            "drift_review_threshold_percentage_points": drift_review_percentage_points,
+            "estimated_portfolio_return_since_lock": None,
+            "current_drawdown_since_lock": None,
+            "max_drawdown_since_lock": None,
+            "next_scheduled_rebalance_date": metadata[
+                "next_scheduled_rebalance_date"
+            ],
+            "instruction": (
+                "The live target is not effective yet. Do not trade again; "
+                "wait for the effective date."
+            ),
+            "estimation_limitations": [],
+        }
+        return MonitorResult(
+            status="PENDING_EFFECTIVE_DATE_NO_TRADE",
+            summary=summary,
+            drift=drift,
+            equity=pd.DataFrame(columns=["Equity", "Drawdown"]),
+        )
 
     available = prices.loc[:as_of_date]
     missing = [ticker for ticker in tickers if available[ticker].dropna().empty]
@@ -193,7 +240,9 @@ def build_monitor_result(
         "status": status,
         "policy": "NO_TRADE_MONITOR_ONLY",
         "official_month": metadata["official_month"],
-        "locked_rebalance_date": str(lock_date.date()),
+        "source_signal_date": str(source_signal_date.date()),
+        "allocation_submitted_date": metadata.get("allocation_submitted_date"),
+        "live_effective_date": str(lock_date.date()),
         "monitor_as_of_date": str(as_of_date.date()),
         "latest_common_price_date": (
             str(pd.Timestamp(common_date).date()) if pd.notna(common_date) else None
@@ -236,8 +285,9 @@ def write_outputs(result: MonitorResult, output_dir: Path) -> dict[str, Path]:
     )
 
     summary = result.summary
-    top_drift = result.drift.dropna(subset=["EstimatedCurrentWeight"]).reindex(
-        result.drift["EstimatedDriftPercentagePoints"].abs().sort_values(
+    valid_drift = result.drift.dropna(subset=["EstimatedCurrentWeight"])
+    top_drift = valid_drift.reindex(
+        valid_drift["EstimatedDriftPercentagePoints"].abs().sort_values(
             ascending=False
         ).index
     ).head(10)
@@ -249,7 +299,9 @@ def write_outputs(result: MonitorResult, output_dir: Path) -> dict[str, Path]:
         "**Instruction: NO TRADE. Keep the locked monthly Wealthfront targets.**",
         "",
         f"- Official month: {summary['official_month']}",
-        f"- Locked rebalance date: {summary['locked_rebalance_date']}",
+        f"- Source market-close signal date: {summary['source_signal_date']}",
+        f"- Allocation submitted date: {summary.get('allocation_submitted_date') or 'not recorded'}",
+        f"- Live effective date: {summary['live_effective_date']}",
         f"- Latest common price date: {summary['latest_common_price_date']}",
         f"- Next scheduled rebalance: {summary['next_scheduled_rebalance_date']}",
         f"- Estimated return since lock: {_format_percent(summary['estimated_portfolio_return_since_lock'])}",
@@ -280,6 +332,7 @@ def write_outputs(result: MonitorResult, output_dir: Path) -> dict[str, Path]:
             "## How to use this report",
             "",
             "- `NORMAL_NO_TRADE`: everything is operating normally; take no action.",
+            "- `PENDING_EFFECTIVE_DATE_NO_TRADE`: the submitted target is not effective yet; wait.",
             "- `REVIEW_DRIFT_NO_TRADE`: drift is notable, but wait for the monthly rebalance.",
             "- `STALE_DATA` or `DATA_ERROR`: do not trade; repair the data problem.",
             "- Market declines alone are not an emergency exit rule.",
@@ -321,8 +374,13 @@ def main() -> None:
         if args.as_of.lower() == "auto"
         else pd.Timestamp(args.as_of)
     )
-    lock_date = pd.Timestamp(metadata["rebalance_date"])
-    if args.prices_csv:
+    lock_date = pd.Timestamp(
+        metadata.get("live_effective_date", metadata["rebalance_date"])
+    )
+    if as_of.normalize() < lock_date.normalize():
+        prices = pd.DataFrame(columns=weights.index, dtype=float)
+        download_error = None
+    elif args.prices_csv:
         prices = pd.read_csv(args.prices_csv, parse_dates=["Date"]).set_index("Date")
         download_error = None
     else:

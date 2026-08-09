@@ -81,17 +81,36 @@ def lock_target(
     source_artifact: str = "",
     locked_at_utc: str | None = None,
     official_month_override: str | None = None,
+    live_effective_date_override: str | None = None,
+    allocation_submitted_date_override: str | None = None,
 ) -> LockResult:
     weights = read_target_weights(source_target_csv)
     rebalance_date = latest_rebalance_date(source_attribution_csv)
     official_month = official_month_override or rebalance_date.strftime("%Y-%m")
     official_period = pd.Period(official_month, freq="M")
+    live_effective_date = (
+        pd.Timestamp(live_effective_date_override).normalize()
+        if live_effective_date_override
+        else max(rebalance_date, official_period.start_time)
+    )
+    allocation_submitted_date = (
+        pd.Timestamp(allocation_submitted_date_override).normalize()
+        if allocation_submitted_date_override
+        else None
+    )
     rebalance_period = rebalance_date.to_period("M")
     if official_period not in {rebalance_period, rebalance_period + 1}:
         raise ValueError(
             "Official month must match the rebalance month or immediately follow "
             "a prior-month weekend/holiday close."
         )
+    if live_effective_date.to_period("M") != official_period:
+        raise ValueError("Live effective date must be within the official month.")
+    if (
+        allocation_submitted_date is not None
+        and allocation_submitted_date > live_effective_date
+    ):
+        raise ValueError("Allocation submission date cannot follow its effective date.")
     current_weights_path = lock_dir / "current_target.csv"
     current_metadata_path = lock_dir / "current_target.json"
 
@@ -119,7 +138,14 @@ def lock_target(
         "strategy": "V5.16 Mom126Skip21",
         "purpose": "Official monthly live target; immutable during the month",
         "official_month": official_month,
+        "source_signal_date": str(rebalance_date.date()),
         "rebalance_date": str(rebalance_date.date()),
+        "allocation_submitted_date": (
+            str(allocation_submitted_date.date())
+            if allocation_submitted_date is not None
+            else None
+        ),
+        "live_effective_date": str(live_effective_date.date()),
         "next_scheduled_rebalance_month": str(
             (pd.Period(official_month, freq="M") + 1)
         ),
@@ -135,8 +161,8 @@ def lock_target(
         "monitor_policy": "NO_TRADE_MONITOR_ONLY until next scheduled rebalance",
     }
     history_dir = lock_dir / "history"
-    history_weights_path = history_dir / f"target_{rebalance_date.date()}.csv"
-    history_metadata_path = history_dir / f"target_{rebalance_date.date()}.json"
+    history_weights_path = history_dir / f"target_{live_effective_date.date()}.csv"
+    history_metadata_path = history_dir / f"target_{live_effective_date.date()}.json"
     if history_metadata_path.exists() and not replace_same_month:
         raise FileExistsError(
             f"Historical lock already exists: {history_metadata_path}"
@@ -175,6 +201,14 @@ def parse_args() -> argparse.Namespace:
         "--official-month",
         help="Official YYYY-MM month; use this when a month starts on a non-trading day.",
     )
+    parser.add_argument(
+        "--live-effective-date",
+        help="Date the target becomes effective in the live account (YYYY-MM-DD).",
+    )
+    parser.add_argument(
+        "--allocation-submitted-date",
+        help="Date the target change was submitted to the live account (YYYY-MM-DD).",
+    )
     parser.add_argument("--source-commit", default=os.environ.get("GITHUB_SHA", ""))
     parser.add_argument("--source-run-url", default="")
     parser.add_argument("--source-artifact", default="")
@@ -199,6 +233,8 @@ def main() -> None:
         source_run_url=args.source_run_url,
         source_artifact=args.source_artifact,
         official_month_override=args.official_month,
+        live_effective_date_override=args.live_effective_date,
+        allocation_submitted_date_override=args.allocation_submitted_date,
     )
     action = "Updated" if result.changed else "Kept existing"
     print(

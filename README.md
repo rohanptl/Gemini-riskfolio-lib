@@ -31,6 +31,14 @@ Lock a completed production run manually:
 python lock_v516_monthly_target.py --output-dir outputs_option2_v5_16_score_tilted_cvar --window 2023
 ```
 
+If you submit a late or weekend rebalance, record the live dates separately from
+the market-close signal date. For example, a target generated from Friday's
+close, submitted Sunday, and effective Monday can be locked with:
+
+```powershell
+python lock_v516_monthly_target.py --output-dir outputs_option2_v5_16_score_tilted_cvar --window 2023 --replace-same-month --allocation-submitted-date 2026-08-09 --live-effective-date 2026-08-10
+```
+
 Generate a monitor-only report from the locked target:
 
 ```powershell
@@ -54,6 +62,7 @@ Interpret every monitor status as non-actionable:
 
 ```text
 NORMAL_NO_TRADE         normal drift; do nothing
+PENDING_EFFECTIVE_DATE_NO_TRADE  submitted allocation is not effective yet; wait
 REVIEW_DRIFT_NO_TRADE   notable drift; wait for the monthly rebalance
 STALE_DATA              data is old; do not trade
 DATA_ERROR              data is incomplete; do not trade
