@@ -257,6 +257,18 @@ def chaikin_money_flow(frame: pd.DataFrame, length: int = 20) -> pd.Series:
 
 
 def add_weekly_indicators(daily: pd.DataFrame) -> pd.DataFrame:
+    """Attach causal week-to-date indicators to every daily row.
+
+    A historical row must produce the same weekly features when calculated in
+    the full data set or with data truncated on that row.  Building a weekly
+    bar with ``groupby(...).last()`` and then joining only its final date breaks
+    that property: a live mid-week run treats the partial week as complete,
+    while a historical mid-week row receives the prior Friday's values.
+
+    The calculations below carry the state of the previous completed week and
+    update it with the current week-to-date OHLCV bar.  This is both causal and
+    consistent with what the daily/weekly chart would show after each close.
+    """
     periods = daily.index.to_period("W-FRI")
     grouped = daily.groupby(periods)
     weekly = grouped.agg(
@@ -266,25 +278,88 @@ def add_weekly_indicators(daily: pd.DataFrame) -> pd.DataFrame:
         Close=("Close", "last"),
         Volume=("Volume", "sum"),
     )
-    weekly["CompletedDate"] = grouped.apply(lambda x: x.index.max(), include_groups=False)
-    weekly["WeeklyRSI14"] = rsi_wilder(weekly["Close"], 14)
-    weekly_ema12 = weekly["Close"].ewm(span=12, adjust=False).mean()
-    weekly_ema26 = weekly["Close"].ewm(span=26, adjust=False).mean()
-    weekly_macd = weekly_ema12 - weekly_ema26
-    weekly_signal = weekly_macd.ewm(span=9, adjust=False).mean()
-    weekly["WeeklyMACDHist"] = weekly_macd - weekly_signal
-    weekly["WeeklyMACDHistDelta1"] = weekly["WeeklyMACDHist"].diff()
-    weekly["WeeklyCMF20"] = chaikin_money_flow(weekly, 20)
-    weekly["WeeklySMA40"] = weekly["Close"].rolling(40, min_periods=40).mean()
+    period_series = pd.Series(periods, index=daily.index)
 
-    completed = weekly.set_index("CompletedDate")[[
-        "WeeklyRSI14",
-        "WeeklyMACDHist",
-        "WeeklyMACDHistDelta1",
-        "WeeklyCMF20",
-        "WeeklySMA40",
-    ]]
-    return daily.join(completed, how="left").ffill()
+    def map_previous(values: pd.Series) -> pd.Series:
+        return period_series.map(values.shift(1)).astype(float)
+
+    previous_close = map_previous(weekly["Close"])
+    weekly_delta = weekly["Close"].diff()
+    alpha_rsi = 1.0 / 14.0
+    completed_avg_gain = weekly_delta.clip(lower=0.0).ewm(
+        alpha=alpha_rsi, adjust=False, min_periods=14
+    ).mean()
+    completed_avg_loss = (-weekly_delta.clip(upper=0.0)).ewm(
+        alpha=alpha_rsi, adjust=False, min_periods=14
+    ).mean()
+    current_delta = daily["Close"] - previous_close
+    current_avg_gain = (
+        (1.0 - alpha_rsi) * map_previous(completed_avg_gain)
+        + alpha_rsi * current_delta.clip(lower=0.0)
+    )
+    current_avg_loss = (
+        (1.0 - alpha_rsi) * map_previous(completed_avg_loss)
+        + alpha_rsi * (-current_delta.clip(upper=0.0))
+    )
+    relative_strength = current_avg_gain / current_avg_loss.replace(0.0, np.nan)
+    weekly_rsi = 100.0 - 100.0 / (1.0 + relative_strength)
+    weekly_rsi = weekly_rsi.where(current_avg_loss > 0.0, 100.0)
+
+    completed_ema12 = weekly["Close"].ewm(span=12, adjust=False).mean()
+    completed_ema26 = weekly["Close"].ewm(span=26, adjust=False).mean()
+    current_ema12 = (
+        2.0 / 13.0 * daily["Close"]
+        + 11.0 / 13.0 * map_previous(completed_ema12)
+    )
+    current_ema26 = (
+        2.0 / 27.0 * daily["Close"]
+        + 25.0 / 27.0 * map_previous(completed_ema26)
+    )
+    current_macd = current_ema12 - current_ema26
+    completed_macd = completed_ema12 - completed_ema26
+    completed_signal = completed_macd.ewm(span=9, adjust=False).mean()
+    current_signal = (
+        0.2 * current_macd + 0.8 * map_previous(completed_signal)
+    )
+    current_histogram = current_macd - current_signal
+    completed_histogram = completed_macd - completed_signal
+
+    week_high = grouped["High"].cummax()
+    week_low = grouped["Low"].cummin()
+    week_volume = grouped["Volume"].cumsum()
+    spread = (week_high - week_low).replace(0.0, np.nan)
+    multiplier = (
+        (daily["Close"] - week_low) - (week_high - daily["Close"])
+    ) / spread
+    current_mfv = multiplier.fillna(0.0) * week_volume.fillna(0.0)
+    weekly_spread = (weekly["High"] - weekly["Low"]).replace(0.0, np.nan)
+    weekly_multiplier = (
+        (weekly["Close"] - weekly["Low"])
+        - (weekly["High"] - weekly["Close"])
+    ) / weekly_spread
+    completed_mfv = weekly_multiplier.fillna(0.0) * weekly["Volume"].fillna(0.0)
+    previous_mfv_19 = map_previous(
+        completed_mfv.rolling(19, min_periods=19).sum()
+    )
+    previous_volume_19 = map_previous(
+        weekly["Volume"].rolling(19, min_periods=19).sum()
+    )
+    weekly_cmf = (previous_mfv_19 + current_mfv) / (
+        previous_volume_19 + week_volume
+    ).replace(0.0, np.nan)
+    previous_close_39 = map_previous(
+        weekly["Close"].rolling(39, min_periods=39).sum()
+    )
+
+    output = daily.copy()
+    output["WeeklyRSI14"] = weekly_rsi
+    output["WeeklyMACDHist"] = current_histogram
+    output["WeeklyMACDHistDelta1"] = (
+        current_histogram - map_previous(completed_histogram)
+    )
+    output["WeeklyCMF20"] = weekly_cmf
+    output["WeeklySMA40"] = (previous_close_39 + daily["Close"]) / 40.0
+    return output
 
 
 def calculate_indicators(frame: pd.DataFrame) -> pd.DataFrame:
