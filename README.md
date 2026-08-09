@@ -157,6 +157,7 @@ Run the causal exit suite and the historical robustness scorecard:
 ```powershell
 python experiment_oversold_reversal_sleeve.py --variant-suite exit --output-dir outputs_experiment_oversold_reversal_sleeve_v7_causal_validation
 python run_daily_awb_validation.py
+python run_daily_awb_presample_validation.py
 ```
 
 The validation runner checks subperiods, neighboring stop parameters, costs up
@@ -173,6 +174,11 @@ outputs_experiment_daily_awb_historical_validation/historical_validation_report.
 Daily AWB weekly-confirmation features are calculated from the current
 week-to-date bar plus prior completed weeks. This makes historical features
 identical to a live run truncated on the same date.
+
+The third command applies the frozen causal rules to January 2007 through
+October 7, 2020 and combines its next-open trade evidence with the causal
+2020-2026 sample. The frozen holdout failed 6 of 7 additional gates, so the
+Daily AWB sleeve is research-only and is not approved for production capital.
 
 The indicator cache invalidates automatically when indicator or signal code
 changes. These sleeve commands do not modify production outputs.

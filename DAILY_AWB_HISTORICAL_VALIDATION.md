@@ -2,9 +2,11 @@
 
 ## Decision
 
-The Daily ATR-Confirmed Washout Breakout ETF Sleeve remains promising research,
-but it is **not ready for a 10% production allocation**. It passed 7 of 10
-predefined historical validation gates.
+The current Daily ATR-Confirmed Washout Breakout ETF Sleeve is **rejected for
+production allocation**. It passed 7 of 10 tests in the 2020-2026 development
+sample, but failed 6 of 7 additional gates when the frozen rules were applied
+unchanged before 2020. It may be monitored in shadow mode, but the evidence
+does not support a 2.5%, 5%, or 10% live sleeve.
 
 The valid causal backtest covers October 2020 through August 7, 2026. The
 selected exit activates after a 3% peak gain and trails the highest post-entry
@@ -52,6 +54,34 @@ return, a 50.0% beat-SPY rate, and a 90.0% bootstrap probability that mean
 excess return is positive. The two-sided 95% interval still includes zero, so
 the observed alpha is not statistically secure.
 
+## Frozen pre-2020 holdout
+
+After the causal rules and exit parameters were frozen, they were applied
+unchanged from January 2007 through October 7, 2020. The test used
+next-session-open entries and exits and measured excess return against SPY over
+the same holding windows.
+
+| Pre-2020 result | Value |
+|---|---:|
+| Closed trades | 28 |
+| Win rate | 50.0% |
+| Mean net trade return | +0.29% |
+| Mean excess return versus SPY | **-0.67%** |
+| Beat-SPY rate | 39.3% |
+| Bootstrap 95% mean-excess interval | -2.33% to +1.10% |
+
+All 11 neighboring ATR exits had negative mean excess return. Only one of five
+pre-2020 market regimes was positive, and only one of four expanding
+walk-forward exit tests was positive. Combining the 28 pre-2020 trades with 14
+causal 2020-2026 trades raises the sample to 42, but combined mean excess is
+only +0.22% and its bootstrap interval remains inconclusive at -1.31% to
++1.96%.
+
+This failure is more informative than waiting years for additional live
+trades: the apparent post-2020 edge does not generalize to earlier regimes.
+The current rule set should not be optimized further against the holdout,
+because doing so would convert it into another development sample.
+
 ## Known-date findings
 
 - XHB did not qualify on April 8, 2026; it lacked the required washout age,
@@ -68,6 +98,7 @@ the observed alpha is not statistically secure.
 ```powershell
 python experiment_oversold_reversal_sleeve.py --variant-suite exit --output-dir outputs_experiment_oversold_reversal_sleeve_v7_causal_validation
 python run_daily_awb_validation.py
+python run_daily_awb_presample_validation.py
 ```
 
 The second command writes the detailed gate table, parameter results,
@@ -75,3 +106,10 @@ subperiods, cost tests, expanding walk-forward selections, next-open trades,
 bootstrap summary, leave-one-ticker-out results, known-date diagnostics, and
 as-of invariance checks under
 `outputs_experiment_daily_awb_historical_validation/`.
+
+The third command downloads and caches long-history data, then writes the
+pre-2020 holdout evidence under
+`outputs_experiment_daily_awb_presample_validation/`. This holdout uses today's
+ETF universe and therefore has survivorship bias; that limitation does not
+explain away the negative result, but it prevents treating the test as a fully
+point-in-time universe study.
