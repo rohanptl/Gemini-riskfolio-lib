@@ -249,6 +249,65 @@ installed and authenticated, it can be dispatched from the VS Code terminal:
 ```powershell
 gh workflow run v516_rolling_asof_allocation_workflow.yml --ref main
 ```
+python explain_v516_allocation_fixed.py \
+  --output-dir outputs_option2_v5_16_score_tilted_cvar \
+  --window 2023 \
+  --zip
+
+## Official monthly target and mid-month monitoring
+
+The monthly allocation workflow locks its first target for each official month
+under `live_targets/v516/`. A second workflow run in the same month does not
+replace that target unless the recovery-only `replace_official_target` input is
+explicitly enabled.
+
+Lock a completed production run manually:
+
+```powershell
+python lock_v516_monthly_target.py --output-dir outputs_option2_v5_16_score_tilted_cvar --window 2023
+```
+
+If you submit a late or weekend rebalance, record the live dates separately from
+the market-close signal date. For example, a target generated from Friday's
+close, submitted Sunday, and effective Monday can be locked with:
+
+```powershell
+python lock_v516_monthly_target.py --output-dir outputs_option2_v5_16_score_tilted_cvar --window 2023 --replace-same-month --allocation-submitted-date 2026-08-09 --live-effective-date 2026-08-10
+```
+
+Generate a monitor-only report from the locked target:
+
+```powershell
+python monitor_v516_midmonth.py --as-of auto
+```
+
+The monitor downloads current adjusted closes, estimates how the locked target
+weights have drifted, and reports return and drawdown since the official
+rebalance. It never runs the allocation model and never writes a new target.
+Its Markdown, JSON, drift, and equity reports are written under
+`outputs_monitor_v516/`.
+
+If you export actual Wealthfront weights to a CSV with `Ticker,Weight` columns,
+use them instead of the price-only estimate:
+
+```powershell
+python monitor_v516_midmonth.py --actual-weights-csv my_wealthfront_weights.csv
+```
+
+Interpret every monitor status as non-actionable:
+
+```text
+NORMAL_NO_TRADE         normal drift; do nothing
+PENDING_EFFECTIVE_DATE_NO_TRADE  submitted allocation is not effective yet; wait
+REVIEW_DRIFT_NO_TRADE   notable drift; wait for the monthly rebalance
+STALE_DATA              data is old; do not trade
+DATA_ERROR              data is incomplete; do not trade
+```
+
+The `V5.16 Mid-Month Monitor Only` GitHub workflow runs each Friday after the
+US close and can also be dispatched manually. It has read-only repository
+permissions and only uploads monitor artifacts.
+  
 
 ## Strategy details
 
