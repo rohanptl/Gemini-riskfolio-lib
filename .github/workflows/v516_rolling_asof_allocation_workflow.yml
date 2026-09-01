@@ -11,7 +11,7 @@ on:
   schedule:
     # Run after US market close on the 1st of each month.
     # Manual runs also evaluate using the latest available close.
-    - cron: "45 22 1 * *"
+    - cron: "20 22 1 * *"
 
 permissions:
   contents: write
