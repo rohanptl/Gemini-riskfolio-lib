@@ -1,4 +1,4 @@
-name: V5.16 Rolling As-Of ETF Allocation rolling
+name: Run production V5.16 V3 risk-overlay allocation
 
 on:
   workflow_dispatch:
@@ -69,7 +69,7 @@ jobs:
       - name: Run production V5.16 Mom126Skip21 allocation
         if: steps.target_guard.outputs.should_run == 'true'
         run: |
-          python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py \
+          python main_option2_all_etfs_v5_16_risk_overlay_v3.py \
             --end-date auto \
             --rebalance-mode rolling_asof_monthly \
             --sma50-eligibility hard \
@@ -129,6 +129,7 @@ jobs:
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/signal_cash_history.csv
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/turnover_by_rebalance.csv
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/risk_overlay_adjustments.csv
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/risk_overlay_summary_by_rebalance.csv
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/benchmark_comparison.csv
             outputs_option2_v5_16_score_tilted_cvar/allocation_explanation_reports/
             live_targets/v516/
