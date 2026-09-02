@@ -128,6 +128,7 @@ jobs:
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/final_portfolio_selection_reasons.csv
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/signal_cash_history.csv
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/turnover_by_rebalance.csv
+            outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/risk_overlay_adjustments.csv
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/benchmark_comparison.csv
             outputs_option2_v5_16_score_tilted_cvar/allocation_explanation_reports/
             live_targets/v516/

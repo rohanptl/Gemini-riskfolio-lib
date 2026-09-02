@@ -164,6 +164,20 @@ MAX_VOL_BASED_CASH_WEIGHT = 0.50
 USE_TURNOVER_CAP = True
 MAX_TURNOVER_PER_REBALANCE = 0.20
 
+# V5.16 production risk overlays.
+# Stale-position exit rules override the turnover cap so broken carryovers cannot linger.
+USE_STALE_POSITION_EXIT_OVERLAY = True
+STALE_INELIGIBLE_REDUCTION_FRACTION = 0.50
+
+# Correlation deconcentration is pairwise and weight-aware.
+# High correlation alone does not force a cut:
+# - effective positive correlation must be >= 0.85
+# - the pair's combined portfolio weight must exceed 15%
+# The weaker side is trimmed and rotated to less-correlated eligible ETFs.
+USE_CORRELATION_DECONCENTRATION_OVERLAY = True
+CORR_DECONCENTRATION_THRESHOLD = 0.85
+MAX_CORRELATED_PAIR_WEIGHT = 0.15
+
 # V5.6: keep turnover control, but do not let tiny residual positions linger forever.
 # Cleanup is applied after the turnover cap. It may push actual turnover slightly
 # above 20%, but only by pruning very small weights.
@@ -1135,6 +1149,393 @@ def apply_turnover_cap(
     return capped
 
 
+
+def _normalize_overlay_weights(weights: pd.Series) -> pd.Series:
+    w = weights.copy().astype(float)
+    w = w.replace([np.inf, -np.inf], np.nan).fillna(0.0).clip(lower=0.0)
+    total = float(w.sum())
+    if total > 0:
+        w = w / total
+    return w
+
+
+def _move_amount_to_cash(weights: pd.Series, amount: float) -> pd.Series:
+    """Move only the specified amount into SGOV."""
+    w = weights.copy().astype(float).fillna(0.0).clip(lower=0.0)
+    if amount > 1e-12 and CASH_TICKER in w.index:
+        w.loc[CASH_TICKER] = float(w.get(CASH_TICKER, 0.0)) + float(amount)
+    return _normalize_overlay_weights(w)
+
+
+def _score_value(score_table: pd.DataFrame, ticker: str) -> float:
+    if score_table is None or score_table.empty or ticker not in score_table.index:
+        return -np.inf
+    value = score_table.loc[ticker].get("Score", np.nan)
+    return float(value) if pd.notna(value) else -np.inf
+
+
+def _eligible_preference_weights(
+    candidates: list[str],
+    target_weights: pd.Series,
+    score_table: pd.DataFrame,
+) -> pd.Series:
+    """Prefer current model target weights; fall back to score, then equal weight."""
+    if not candidates:
+        return pd.Series(dtype=float)
+
+    target = target_weights.reindex(candidates).fillna(0.0).clip(lower=0.0)
+    if float(target.sum()) > 1e-12:
+        return target / target.sum()
+
+    scores = pd.Series(
+        {ticker: _score_value(score_table, ticker) for ticker in candidates},
+        dtype=float,
+    ).replace([np.inf, -np.inf], np.nan)
+
+    if scores.notna().any():
+        finite = scores.dropna()
+        shifted = (scores - finite.min() + 1e-6).fillna(0.0).clip(lower=0.0)
+        if float(shifted.sum()) > 1e-12:
+            return shifted / shifted.sum()
+
+    return pd.Series(1.0 / len(candidates), index=candidates, dtype=float)
+
+
+def _candidate_pair_capacity(
+    ticker: str,
+    weights: pd.Series,
+    corr: pd.DataFrame | None,
+) -> float:
+    """Capacity while respecting individual and correlated-pair caps."""
+    current = float(weights.get(ticker, 0.0))
+    capacity = max(0.0, MAX_RISK_ASSET_WEIGHT - current)
+
+    if corr is None or corr.empty or ticker not in corr.index:
+        return capacity
+
+    for peer, raw_weight in weights.items():
+        if peer in {ticker, CASH_TICKER}:
+            continue
+        peer_weight = float(raw_weight)
+        if peer_weight <= 0 or peer not in corr.columns:
+            continue
+        value = corr.loc[ticker, peer]
+        if pd.notna(value) and float(value) >= CORR_DECONCENTRATION_THRESHOLD:
+            pair_capacity = MAX_CORRELATED_PAIR_WEIGHT - current - peer_weight
+            capacity = min(capacity, max(0.0, pair_capacity))
+
+    return max(0.0, capacity)
+
+
+def _redistribute_to_eligible(
+    weights: pd.Series,
+    amount: float,
+    eligible_assets: list[str],
+    target_weights: pd.Series,
+    score_table: pd.DataFrame,
+    exclude_assets: set[str] | None = None,
+    corr: pd.DataFrame | None = None,
+    enforce_pair_caps: bool = False,
+) -> tuple[pd.Series, float, float, dict[str, float]]:
+    """Redistribute released weight into current eligible ETFs."""
+    w = weights.copy().astype(float).fillna(0.0).clip(lower=0.0)
+    remaining = max(0.0, float(amount))
+    recipients: dict[str, float] = {}
+    excluded = set(exclude_assets or set())
+
+    eligible = [
+        ticker for ticker in eligible_assets
+        if ticker in w.index and ticker != CASH_TICKER and ticker not in excluded
+    ]
+
+    for _ in range(100):
+        if remaining <= 1e-12:
+            break
+
+        capacities: dict[str, float] = {}
+        for ticker in eligible:
+            if enforce_pair_caps:
+                capacity = _candidate_pair_capacity(ticker, w, corr)
+            else:
+                capacity = max(
+                    0.0,
+                    MAX_RISK_ASSET_WEIGHT - float(w.get(ticker, 0.0)),
+                )
+            if capacity > 1e-12:
+                capacities[ticker] = capacity
+
+        if not capacities:
+            break
+
+        active = list(capacities)
+        preferences = _eligible_preference_weights(active, target_weights, score_table)
+        start_remaining = remaining
+
+        for ticker in active:
+            desired = start_remaining * float(preferences.get(ticker, 0.0))
+            allocation = min(capacities[ticker], desired, remaining)
+            if allocation <= 1e-12:
+                continue
+            w.loc[ticker] = float(w.get(ticker, 0.0)) + allocation
+            recipients[ticker] = recipients.get(ticker, 0.0) + allocation
+            remaining -= allocation
+
+        if start_remaining - remaining <= 1e-12:
+            break
+
+    allocated = max(0.0, float(amount) - remaining)
+    return w, allocated, remaining, recipients
+
+
+def _format_recipient_allocations(recipients: dict[str, float]) -> str:
+    if not recipients:
+        return ""
+    return ",".join(
+        f"{ticker}:{weight:.6f}"
+        for ticker, weight in sorted(recipients.items(), key=lambda item: item[1], reverse=True)
+    )
+
+
+def apply_stale_position_exit_overlay(
+    weights: pd.Series,
+    score_table: pd.DataFrame,
+    eligible_assets: list[str],
+    target_weights: pd.Series,
+) -> tuple[pd.Series, list[dict]]:
+    """
+    Hard exits go to SGOV. Soft 50% stale trims rotate into current eligible ETFs.
+    """
+    if not USE_STALE_POSITION_EXIT_OVERLAY:
+        return weights, []
+
+    w = weights.copy().astype(float).fillna(0.0).clip(lower=0.0)
+    eligible_set = set(eligible_assets)
+    actions: list[dict] = []
+
+    for ticker in list(w.index):
+        if ticker == CASH_TICKER:
+            continue
+
+        current_weight = float(w.get(ticker, 0.0))
+        if current_weight <= 0 or ticker in eligible_set:
+            continue
+
+        score_row = (
+            score_table.loc[ticker]
+            if score_table is not None and not score_table.empty and ticker in score_table.index
+            else pd.Series(dtype=object)
+        )
+
+        above_sma126_raw = score_row.get("AboveSMA126", np.nan)
+        mom63 = score_row.get("Mom63", np.nan)
+        mom126 = score_row.get("Mom126", np.nan)
+        below_sma126 = False if pd.isna(above_sma126_raw) else not bool(above_sma126_raw)
+        both_momentum_negative = (
+            pd.notna(mom63) and pd.notna(mom126)
+            and float(mom63) < 0 and float(mom126) < 0
+        )
+
+        recipients: dict[str, float] = {}
+        redistributed = 0.0
+        moved_to_sgov = 0.0
+
+        if below_sma126 or both_momentum_negative:
+            released = current_weight
+            w.loc[ticker] = 0.0
+            w = _move_amount_to_cash(w, released)
+            moved_to_sgov = released
+            action_type = "HardExit"
+            if below_sma126:
+                reason = "No longer eligible and below SMA126 -> full exit to SGOV"
+            else:
+                reason = "No longer eligible and Mom63/Mom126 both negative -> full exit to SGOV"
+        else:
+            new_weight = current_weight * (1.0 - STALE_INELIGIBLE_REDUCTION_FRACTION)
+            released = current_weight - new_weight
+            w.loc[ticker] = new_weight
+            w, redistributed, unallocated, recipients = _redistribute_to_eligible(
+                weights=w,
+                amount=released,
+                eligible_assets=eligible_assets,
+                target_weights=target_weights,
+                score_table=score_table,
+                exclude_assets={ticker},
+            )
+            if unallocated > 1e-12:
+                w = _move_amount_to_cash(w, unallocated)
+                moved_to_sgov = unallocated
+            action_type = "SoftTrim"
+            reason = (
+                f"No longer eligible -> reduce by {STALE_INELIGIBLE_REDUCTION_FRACTION:.0%}; "
+                "rotate released weight into current eligible basket"
+            )
+
+        actions.append({
+            "Ticker": ticker,
+            "Overlay": "StalePositionExit",
+            "ActionType": action_type,
+            "WeightBefore": current_weight,
+            "WeightAfter": float(w.get(ticker, 0.0)),
+            "WeightReleased": released,
+            "WeightRedistributedToEligible": redistributed,
+            "WeightFreedToSGOV": moved_to_sgov,
+            "RecipientAllocations": _format_recipient_allocations(recipients),
+            "Reason": reason,
+            "AboveSMA126": above_sma126_raw,
+            "Mom63": mom63,
+            "Mom126": mom126,
+        })
+
+    return _normalize_overlay_weights(w), actions
+
+
+def _effective_positive_correlation(
+    train_returns: pd.DataFrame,
+    assets: list[str],
+) -> pd.DataFrame:
+    """Effective positive correlation = max(raw 63d corr, raw 126d corr)."""
+    available = [a for a in assets if a in train_returns.columns]
+    if len(available) < 2:
+        return pd.DataFrame(index=available, columns=available, dtype=float)
+
+    fast = train_returns[available].tail(min(FAST_CORR_LOOKBACK_DAYS, len(train_returns))).corr()
+    slow = train_returns[available].tail(min(SLOW_CORR_LOOKBACK_DAYS, len(train_returns))).corr()
+    effective = pd.DataFrame(index=available, columns=available, dtype=float)
+
+    for a in available:
+        for b in available:
+            values = [v for v in (fast.loc[a, b], slow.loc[a, b]) if pd.notna(v)]
+            effective.loc[a, b] = max(values) if values else np.nan
+    return effective
+
+
+def _weaker_pair_member(
+    ticker_a: str,
+    ticker_b: str,
+    weights: pd.Series,
+    score_table: pd.DataFrame,
+    eligible_assets: list[str],
+) -> tuple[str, str]:
+    eligible_set = set(eligible_assets)
+    a_eligible = ticker_a in eligible_set
+    b_eligible = ticker_b in eligible_set
+
+    if a_eligible != b_eligible:
+        return (ticker_b, ticker_a) if a_eligible else (ticker_a, ticker_b)
+
+    score_a = _score_value(score_table, ticker_a)
+    score_b = _score_value(score_table, ticker_b)
+    if score_a != score_b:
+        return (ticker_a, ticker_b) if score_a < score_b else (ticker_b, ticker_a)
+
+    weight_a = float(weights.get(ticker_a, 0.0))
+    weight_b = float(weights.get(ticker_b, 0.0))
+    return (ticker_a, ticker_b) if weight_a <= weight_b else (ticker_b, ticker_a)
+
+
+def apply_correlation_deconcentration_overlay(
+    weights: pd.Series,
+    train_returns: pd.DataFrame,
+    score_table: pd.DataFrame,
+    eligible_assets: list[str],
+    target_weights: pd.Series,
+) -> tuple[pd.Series, list[dict]]:
+    """
+    Trim only pairs with corr >= 0.85 AND combined weight > 15%.
+    Rotate the released amount to less-correlated eligible ETFs; SGOV is fallback only.
+    """
+    if not USE_CORRELATION_DECONCENTRATION_OVERLAY:
+        return weights, []
+
+    w = weights.copy().astype(float).fillna(0.0).clip(lower=0.0)
+    all_corr_assets = list(dict.fromkeys(
+        [t for t, x in w.items() if t != CASH_TICKER and float(x) > 0]
+        + [t for t in eligible_assets if t != CASH_TICKER]
+    ))
+
+    if len(all_corr_assets) < 2:
+        return _normalize_overlay_weights(w), []
+
+    corr = _effective_positive_correlation(train_returns, all_corr_assets)
+    actions: list[dict] = []
+
+    for _ in range(100):
+        holdings = [
+            t for t, x in w.items()
+            if t != CASH_TICKER and float(x) > 1e-12 and t in corr.index
+        ]
+        violations: list[tuple[float, float, str, str]] = []
+
+        for i, ticker_a in enumerate(holdings):
+            for ticker_b in holdings[i + 1:]:
+                value = corr.loc[ticker_a, ticker_b]
+                if pd.isna(value):
+                    continue
+                correlation = float(value)
+                if correlation < CORR_DECONCENTRATION_THRESHOLD:
+                    continue
+                pair_weight = float(w.get(ticker_a, 0.0)) + float(w.get(ticker_b, 0.0))
+                if pair_weight > MAX_CORRELATED_PAIR_WEIGHT + 1e-12:
+                    violations.append((pair_weight - MAX_CORRELATED_PAIR_WEIGHT, correlation, ticker_a, ticker_b))
+
+        if not violations:
+            break
+
+        violations.sort(reverse=True)
+        excess, correlation, ticker_a, ticker_b = violations[0]
+        weaker, stronger = _weaker_pair_member(
+            ticker_a, ticker_b, w, score_table, eligible_assets
+        )
+
+        weaker_before = float(w.get(weaker, 0.0))
+        if weaker_before <= 1e-12:
+            break
+
+        reduction = min(weaker_before, excess)
+        pair_weight_before = float(w.get(ticker_a, 0.0)) + float(w.get(ticker_b, 0.0))
+        w.loc[weaker] = weaker_before - reduction
+
+        w, redistributed, unallocated, recipients = _redistribute_to_eligible(
+            weights=w,
+            amount=reduction,
+            eligible_assets=eligible_assets,
+            target_weights=target_weights,
+            score_table=score_table,
+            exclude_assets={ticker_a, ticker_b},
+            corr=corr,
+            enforce_pair_caps=True,
+        )
+
+        moved_to_sgov = 0.0
+        if unallocated > 1e-12:
+            w = _move_amount_to_cash(w, unallocated)
+            moved_to_sgov = unallocated
+
+        actions.append({
+            "Ticker": weaker,
+            "Overlay": "CorrelationDeconcentration",
+            "ActionType": "PairTrim",
+            "WeightBefore": weaker_before,
+            "WeightAfter": float(w.get(weaker, 0.0)),
+            "WeightReleased": reduction,
+            "WeightRedistributedToEligible": redistributed,
+            "WeightFreedToSGOV": moved_to_sgov,
+            "RecipientAllocations": _format_recipient_allocations(recipients),
+            "Reason": (
+                f"Pair correlation {correlation:.3f} >= {CORR_DECONCENTRATION_THRESHOLD:.2f} "
+                f"and combined weight exceeded {MAX_CORRELATED_PAIR_WEIGHT:.0%}; "
+                "trim weaker member and rotate to less-correlated eligible ETFs"
+            ),
+            "CorrelationPair": ",".join(sorted([ticker_a, ticker_b])),
+            "PairCorrelation": correlation,
+            "PairWeightBefore": pair_weight_before,
+            "PairWeightCap": MAX_CORRELATED_PAIR_WEIGHT,
+            "StrongerPairMember": stronger,
+        })
+
+    return _normalize_overlay_weights(w), actions
+
+
 # ============================================================
 # RISKFOLIO OPTIMIZER
 # ============================================================
@@ -1600,6 +2001,8 @@ def build_rebalance_allocation_attribution(
     cash_weight: float,
     target_final_weights: pd.Series,
     post_turnover_weights: pd.Series,
+    post_stale_exit_weights: pd.Series,
+    post_correlation_weights: pd.Series,
     final_weights: pd.Series,
     signal_breadth: float,
     breadth_cash_weight: float,
@@ -1639,6 +2042,8 @@ def build_rebalance_allocation_attribution(
             + [str(t) for t in opt.index.tolist()]
             + [str(t) for t in target_final_weights.index.tolist()]
             + [str(t) for t in post_turnover_weights.index.tolist()]
+            + [str(t) for t in post_stale_exit_weights.index.tolist()]
+            + [str(t) for t in post_correlation_weights.index.tolist()]
             + [str(t) for t in final_weights.index.tolist()]
         )
     )
@@ -1651,6 +2056,8 @@ def build_rebalance_allocation_attribution(
 
     target = target_final_weights.reindex(all_tickers).fillna(0.0)
     post_turnover = post_turnover_weights.reindex(all_tickers).fillna(0.0)
+    post_stale_exit = post_stale_exit_weights.reindex(all_tickers).fillna(0.0)
+    post_correlation = post_correlation_weights.reindex(all_tickers).fillna(0.0)
     final = final_weights.reindex(all_tickers).fillna(0.0)
     risk = risk_weights.reindex(all_tickers).fillna(0.0)
 
@@ -1663,6 +2070,8 @@ def build_rebalance_allocation_attribution(
         prev_weight = float(previous.get(ticker, 0.0))
         target_weight = float(target.get(ticker, 0.0))
         post_turnover_weight = float(post_turnover.get(ticker, 0.0))
+        post_stale_exit_weight = float(post_stale_exit.get(ticker, 0.0))
+        post_correlation_weight = float(post_correlation.get(ticker, 0.0))
 
         score_row = score.loc[ticker] if ticker in score.index else pd.Series(dtype=object)
         opt_row = opt.loc[ticker] if ticker in opt.index else pd.Series(dtype=object)
@@ -1756,6 +2165,10 @@ def build_rebalance_allocation_attribution(
                 "PreviousFinalWeight": prev_weight,
                 "WeightBeforeTurnoverCap": target_weight,
                 "WeightAfterTurnoverCapBeforePrune": post_turnover_weight,
+                "WeightAfterStaleExitOverlay": post_stale_exit_weight,
+                "WeightAfterCorrelationDeconcentration": post_correlation_weight,
+                "StaleExitOverlayReduction": max(0.0, post_turnover_weight - post_stale_exit_weight),
+                "CorrelationOverlayReduction": max(0.0, post_stale_exit_weight - post_correlation_weight),
                 "WeightAfterPruningFinal": final_weight,
                 "FinalWeight": final_weight,
                 "FinalWeightPct": final_weight * 100.0,
@@ -1764,7 +2177,8 @@ def build_rebalance_allocation_attribution(
                 "TurnoverBeforePrune": turnover_before_prune,
                 "TurnoverAfterPrune": turnover_after_prune,
                 "PrunedOrReducedByCleanup": (
-                    post_turnover_weight > 0 and final_weight < post_turnover_weight - 1e-12
+                    post_correlation_weight > 0
+                    and final_weight < post_correlation_weight - 1e-12
                 ),
                 "TradeableDisplayCandidate": final_weight >= TRADEABLE_MIN_WEIGHT,
                 "InFinalPortfolio": final_weight > 0,
@@ -2470,6 +2884,7 @@ def run_backtest_for_start_window(
     turnover_rows = []
     eligibility_rows = []
     allocation_attribution_rows = []
+    risk_overlay_rows = []
     daily_portfolio_returns = []
 
     previous_weights = None
@@ -2533,13 +2948,45 @@ def run_backtest_for_start_window(
             max_turnover=MAX_TURNOVER_PER_REBALANCE,
         )
 
-        turnover_before_prune = calculate_turnover(
+        turnover_after_turnover_cap = calculate_turnover(
             previous_weights=previous_weights,
             current_weights=weights_after_turnover_cap,
             all_assets=final_assets,
         )
 
-        final_weights = prune_tiny_positions_after_turnover(weights_after_turnover_cap)
+        weights_after_stale_exit, stale_exit_actions = apply_stale_position_exit_overlay(
+            weights=weights_after_turnover_cap,
+            score_table=score_table,
+            eligible_assets=eligible_assets,
+            target_weights=target_final_weights,
+        )
+
+        turnover_after_stale_exit = calculate_turnover(
+            previous_weights=previous_weights,
+            current_weights=weights_after_stale_exit,
+            all_assets=final_assets,
+        )
+
+        weights_after_correlation_overlay, correlation_actions = apply_correlation_deconcentration_overlay(
+            weights=weights_after_stale_exit,
+            train_returns=train_returns,
+            score_table=score_table,
+            eligible_assets=eligible_assets,
+            target_weights=target_final_weights,
+        )
+
+        turnover_before_prune = calculate_turnover(
+            previous_weights=previous_weights,
+            current_weights=weights_after_correlation_overlay,
+            all_assets=final_assets,
+        )
+
+        for action in [*stale_exit_actions, *correlation_actions]:
+            action["Date"] = date
+            action["StartWindow"] = start_date
+            risk_overlay_rows.append(action)
+
+        final_weights = prune_tiny_positions_after_turnover(weights_after_correlation_overlay)
 
         turnover = calculate_turnover(
             previous_weights=previous_weights,
@@ -2559,6 +3006,8 @@ def run_backtest_for_start_window(
             cash_weight=cash_weight,
             target_final_weights=target_final_weights,
             post_turnover_weights=weights_after_turnover_cap,
+            post_stale_exit_weights=weights_after_stale_exit,
+            post_correlation_weights=weights_after_correlation_overlay,
             final_weights=final_weights,
             signal_breadth=signal_breadth,
             breadth_cash_weight=breadth_cash_weight,
@@ -2600,7 +3049,10 @@ def run_backtest_for_start_window(
                 "Date": date,
                 "StartWindow": start_date,
                 "Turnover": turnover,
+                "TurnoverAfterTurnoverCap": turnover_after_turnover_cap,
+                "TurnoverAfterStaleExitOverlay": turnover_after_stale_exit,
                 "TurnoverBeforePrune": turnover_before_prune,
+                "ExtraTurnoverFromRiskOverlays": max(0.0, turnover_before_prune - (0.0 if np.isnan(turnover_after_turnover_cap) else turnover_after_turnover_cap)),
                 "ExtraTurnoverFromPrune": max(0.0, turnover - turnover_before_prune),
                 "SignalBreadth": signal_breadth,
                 "CashWeight": cash_weight,
@@ -2635,6 +3087,8 @@ def run_backtest_for_start_window(
                 f"turnover={turnover if not np.isnan(turnover) else 0:.2%} | "
                 f"cash={cash_weight:.2%} | "
                 f"eligible={len(eligible_assets)} | "
+                f"stale_actions={len(stale_exit_actions)} | "
+                f"corr_actions={len(correlation_actions)} | "
                 f"top={top_weights}"
             )
 
@@ -2647,6 +3101,9 @@ def run_backtest_for_start_window(
 
     turnover_df = pd.DataFrame(turnover_rows)
     turnover_df.to_csv(output_dir / "turnover_by_rebalance.csv", index=False)
+
+    risk_overlay_df = pd.DataFrame(risk_overlay_rows)
+    risk_overlay_df.to_csv(output_dir / "risk_overlay_adjustments.csv", index=False)
 
     eligibility_df = pd.concat(eligibility_rows, ignore_index=True)
     eligibility_df.to_csv(output_dir / "eligibility_history.csv", index=False)
