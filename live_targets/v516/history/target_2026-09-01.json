@@ -8,13 +8,13 @@
   "live_effective_date": "2026-09-01",
   "next_scheduled_rebalance_month": "2026-10",
   "next_scheduled_rebalance_date": "2026-10-01",
-  "locked_at_utc": "2026-09-01T22:45:01.282858+00:00",
+  "locked_at_utc": "2026-09-02T16:04:42.618579+00:00",
   "holdings": 16,
-  "weight_sum": 0.9999999999999991,
+  "weight_sum": 0.9999999999999993,
   "source_target_csv": "outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/final_target_weights_tradeable.csv",
   "source_attribution_csv": "outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/allocation_attribution_by_rebalance.csv",
-  "source_commit": "4e911cc27a22345fe6327d64eeb3b4c175b71af9",
-  "source_run_url": "https://github.com/rohanptl/Gemini-riskfolio-lib/actions/runs/33567686475",
-  "source_artifact": "v516-rolling-asof-2026-09-01-18",
+  "source_commit": "d4b2ca087004a4b5d9d8aeebd2551931f410cddb",
+  "source_run_url": "https://github.com/rohanptl/Gemini-riskfolio-lib/actions/runs/33652418202",
+  "source_artifact": "v516-rolling-asof-2026-09-01-20",
   "monitor_policy": "NO_TRADE_MONITOR_ONLY until next scheduled rebalance"
 }
