@@ -9,9 +9,10 @@ on:
         default: false
         type: boolean
   schedule:
-    # Run after US market close on the 1st of each month.
-    # Manual runs also evaluate using the latest available close.
-    - cron: "30 22 1 * *"
+    #approximately:
+    #  7:30 PM ET during EDT
+    #  6:30 PM ET during EST
+    - cron: "30 23 1 * *"
 
 permissions:
   contents: write
