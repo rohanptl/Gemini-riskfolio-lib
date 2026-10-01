@@ -10,7 +10,7 @@ on:
         type: boolean
   schedule:
     # GitHub Actions cron uses UTC: 3:00 PM EST (4:00 PM EDT).
-    - cron: "05 20 1 * *"
+    - cron: "35 20 1 * *"
 
 permissions:
   contents: write
