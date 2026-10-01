@@ -9,10 +9,8 @@ on:
         default: false
         type: boolean
   schedule:
-    #approximately:
-    #  7:30 PM ET during EDT
-    #  6:30 PM ET during EST
-    - cron: "30 23 1 * *"
+    # GitHub Actions cron uses UTC: 3:00 PM EST (4:00 PM EDT).
+    - cron: "05 20 1 * *"
 
 permissions:
   contents: write
