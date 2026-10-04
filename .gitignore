@@ -9,3 +9,6 @@ outputs_milestone_*/
 outputs_monitor_v516/
 __pycache__/
 *.py[cod]
+
+__pycache__/
+*.py[cod]
