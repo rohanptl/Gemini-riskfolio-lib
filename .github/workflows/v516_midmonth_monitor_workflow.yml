@@ -7,7 +7,7 @@ on:
     - cron: "30 23 * * 5"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: v516-midmonth-monitor
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -38,10 +40,27 @@ jobs:
             --output-dir outputs_monitor_v516 \
             --as-of auto
 
-      - name: Upload monitor-only report
-        uses: actions/upload-artifact@v4
-        with:
-          name: v516-midmonth-monitor-${{ github.run_number }}
-          path: outputs_monitor_v516/
-          if-no-files-found: error
-          retention-days: 90
+      - name: Commit latest monitor reports
+        shell: bash
+        run: |
+          # Fail safely rather than deleting previously committed reports.
+          if [ ! -d outputs_monitor_v516 ] || \
+             [ -z "$(find outputs_monitor_v516 -type f -print -quit)" ]; then
+            echo "::error::No monitor reports were generated"
+            exit 1
+          fi
+
+          mkdir -p reports/v516-midmonth
+          rsync -a --delete outputs_monitor_v516/ reports/v516-midmonth/
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A reports/v516-midmonth/
+
+          if git diff --cached --quiet; then
+            echo "Monitor reports unchanged; skipping commit"
+            exit 0
+          fi
+
+          git commit -m "Update V5.16 midmonth monitor reports"
+          git push origin HEAD:main
