@@ -8,27 +8,27 @@
 - Source market-close signal date: 2026-09-30
 - Allocation submitted date: not recorded
 - Live effective date: 2026-10-01
-- Latest common price date: 2026-10-20
+- Latest common price date: 2026-10-23
 - Next scheduled rebalance: 2026-11-01
-- Estimated return since lock: -1.19%
-- Current drawdown since lock: -2.45%
+- Estimated return since lock: -1.26%
+- Current drawdown since lock: -2.52%
 - Maximum drawdown since lock: -3.34%
-- Maximum estimated weight drift: 0.67 percentage points
+- Maximum estimated weight drift: 0.72 percentage points
 
 ## Largest estimated drifts
 
 | Ticker | Locked target | Estimated weight | Drift (percentage points) |
 |---|---:|---:|---:|
-| EWY | 4.07% | 3.40% | -0.67 |
-| XLV | 5.49% | 6.01% | +0.52 |
-| SGOV | 36.84% | 37.36% | +0.52 |
-| EWT | 8.70% | 8.36% | -0.34 |
-| XOP | 2.78% | 3.02% | +0.24 |
-| QTEC | 3.40% | 3.16% | -0.24 |
-| ARKG | 3.40% | 3.16% | -0.24 |
-| CIBR | 7.15% | 6.96% | -0.19 |
-| JQUA | 5.65% | 5.82% | +0.17 |
-| EWS | 3.07% | 2.93% | -0.14 |
+| EWY | 4.07% | 3.35% | -0.72 |
+| SGOV | 36.84% | 37.41% | +0.56 |
+| XLV | 5.49% | 6.00% | +0.51 |
+| EWT | 8.70% | 8.19% | -0.50 |
+| XOP | 2.78% | 3.08% | +0.30 |
+| QTEC | 3.40% | 3.10% | -0.30 |
+| ARKG | 3.40% | 3.12% | -0.28 |
+| CIBR | 7.15% | 7.40% | +0.25 |
+| JQUA | 5.65% | 5.84% | +0.19 |
+| EWS | 3.07% | 2.91% | -0.16 |
 
 ## How to use this report
 
