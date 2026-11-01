@@ -1,0 +1,20 @@
+{
+  "strategy": "V5.16 Mom126Skip21",
+  "purpose": "Official monthly live target; immutable during the month",
+  "official_month": "2026-11",
+  "source_signal_date": "2026-10-30",
+  "rebalance_date": "2026-10-30",
+  "allocation_submitted_date": null,
+  "live_effective_date": "2026-11-01",
+  "next_scheduled_rebalance_month": "2026-12",
+  "next_scheduled_rebalance_date": "2026-12-01",
+  "locked_at_utc": "2026-11-01T23:51:11.941624+00:00",
+  "holdings": 15,
+  "weight_sum": 1.0,
+  "source_target_csv": "outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/final_target_weights_tradeable.csv",
+  "source_attribution_csv": "outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/allocation_attribution_by_rebalance.csv",
+  "source_commit": "5ff8704dd6fa395560c6ba4d1822accbec19611e",
+  "source_run_url": "https://github.com/rohanptl/Gemini-riskfolio-lib/actions/runs/41363984464",
+  "source_artifact": "v516-rolling-asof-2026-10-30-23",
+  "monitor_policy": "NO_TRADE_MONITOR_ONLY until next scheduled rebalance"
+}
