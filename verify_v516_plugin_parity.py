@@ -346,6 +346,9 @@ def freeze_baseline(
             "validated production run."
         )
 
+    if existing and force:
+        shutil.rmtree(baseline_dir)
+
     baseline_dir.mkdir(parents=True, exist_ok=True)
 
     frozen_files: list[str] = []
