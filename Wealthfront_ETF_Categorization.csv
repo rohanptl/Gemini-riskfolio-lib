@@ -1,34 +1,45 @@
 Ticker,ETF_Name,Asset_Class,Category
+AIQ,Global X Artificial Intelligence & Technology ETF,Thematic Equity,Artificial Intelligence
+ALLW,State Street Bridgewater All Weather ETF,Multi-Asset & Alternatives,All Weather / Multi-Asset
 ANGL,VanEck Fallen Angel High Yield Bond ETF,Fixed Income & Cash,High Yield Bonds
 ARKF,ARK Blockchain & Fintech Innovation ETF,Thematic Equity,Fintech / Blockchain Equity
 ARKG,ARK Genomic Revolution ETF,Thematic Equity,Genomics
 ARKK,ARK Innovation ETF,Thematic Equity,Innovation
 ARKQ,ARK Autonomous Technology & Robotics ETF,Thematic Equity,Autonomous Technology & Robotics
-ARKW,ARK Next Generation Internet ETF,Thematic Equity,Next Generation Internet
+ARKW,ARK Next Generation Technology ETF,Thematic Equity,Next Generation Internet
 AVDE,Avantis International Equity ETF,International Equity,Developed Markets
 AVDV,Avantis International Small Cap Value ETF,International Equity,International Small Cap Value
 AVEM,Avantis Emerging Markets Equity ETF,International Equity,Emerging Markets
+AVLV,Avantis US Large Cap Value ETF,US Equity,US Large Cap Value
 AVUS,Avantis US Equity ETF,US Equity,US Broad Market
 AVUV,Avantis U.S. Small Cap Value ETF,US Equity,US Small Cap Value
 BBCA,JPMorgan BetaBuilders Canada ETF,International Equity,Single Country: Canada
 BBJP,JPMorgan BetaBuilders Japan ETF,International Equity,Single Country: Japan
 BIL,State Street SPDR Bloomberg 1-3 Month T-Bill ETF,Fixed Income & Cash,T-Bills / Cash Equivalent
+BIZD,VanEck BDC Income ETF,Fixed Income & Cash,BDC Income
 BKLN,Invesco Senior Loan ETF,Fixed Income & Cash,Senior Loans
 BLOK,Amplify Blockchain Technology ETF,Thematic Equity,Blockchain Equity
 BLV,Vanguard Long-Term Bond ETF,Fixed Income & Cash,Long-Term Bonds
 BND,Vanguard Total Bond Market ETF,Fixed Income & Cash,Core Bonds
 BNDX,Vanguard Total International Bond ETF,Fixed Income & Cash,International Bonds
 BOTZ,Global X Robotics & Artificial Intelligence ETF,Thematic Equity,Robotics & Artificial Intelligence
+BOXX,Alpha Architect 1-3 Month Box ETF,Fixed Income & Cash,Box Spread / Cash Alternative
 BSV,Vanguard Short-Term Bond ETF,Fixed Income & Cash,Short-Term Bonds
 CIBR,First Trust NASDAQ Cybersecurity ETF,Thematic Equity,Cybersecurity
 CMF,iShares California Muni Bond ETF,Fixed Income & Cash,California Muni Bonds
+COPX,Global X Copper Miners ETF,Commodities & Hard Assets,Copper Miners
+DBMF,iMGP DBi Managed Futures Strategy ETF,Multi-Asset & Alternatives,Managed Futures
+DGRW,WisdomTree U.S. Quality Dividend Growth Fund,US Equity,Quality Dividend Growth
 DIA,State Street SPDR Dow Jones Industrial Average ETF Trust,US Equity,Dow Jones / Large Cap
 DIV,Global X SuperDividend US ETF,US Equity,US High Dividend
 DIVO,Amplify CWP Enhanced Dividend Income ETF,US Equity,US Equity Premium Income
+DRAM,Roundhill Memory ETF,Thematic Equity,Memory / Semiconductors
 DSI,iShares ESG MSCI KLD 400 ETF,US Equity,US ESG Large Cap
+DTCR,Global X Data Center & Digital Infrastructure ETF,Thematic Equity,Data Center & Digital Infrastructure
 DVYE,iShares Emerging Markets Dividend ETF,International Equity,Emerging Markets Dividend
+DXJ,WisdomTree Japan Hedged Equity Fund,International Equity,Currency Hedged Japan
 EAGG,iShares ESG Aware U.S. Aggregate Bond ETF,Fixed Income & Cash,ESG Aggregate Bonds
-EBND,SPDR Bloomberg Emerging Markets Local Bond ETF,Fixed Income & Cash,Emerging Markets Local Bonds
+EBND,State Street SPDR Bloomberg Emerging Markets Local Bond ETF,Fixed Income & Cash,Emerging Markets Local Bonds
 ECH,iShares MSCI Chile ETF,International Equity,Single Country: Chile
 EEMV,iShares MSCI Emerging Markets Min Vol Factor ETF,Defensive Equity,Emerging Markets Minimum Volatility
 EFAV,iShares MSCI EAFE Min Vol Factor ETF,Defensive Equity,International Minimum Volatility
@@ -71,6 +82,7 @@ GDXJ,VanEck Junior Gold Miners ETF,Commodities & Hard Assets,Junior Gold Miners
 GLDM,SPDR Gold MiniShares Trust,Commodities & Hard Assets,Gold Bullion
 GNR,State Street SPDR S&P Global Natural Resources ETF,Commodities & Hard Assets,Global Natural Resources
 GOVT,iShares U.S. Treasury Bond ETF,Fixed Income & Cash,Treasury Bonds
+GRID,First Trust NASDAQ Clean Edge Smart Grid Infrastructure Index Fund,Thematic Equity,Smart Grid Infrastructure
 GSIE,Goldman Sachs ActiveBeta International Equity ETF,International Equity,International Equity
 GSLC,Goldman Sachs ActiveBeta U.S. Large Cap Equity ETF,US Equity,US Large Cap
 HEFA,iShares Currency Hedged MSCI EAFE ETF,International Equity,Currency Hedged EAFE
@@ -78,12 +90,14 @@ HYD,VanEck High Yield Muni ETF,Fixed Income & Cash,High Yield Muni Bonds
 IBB,iShares Biotechnology ETF,US Equity,Biotechnology
 IBIT,iShares Bitcoin Trust ETF,Cryptocurrency,Bitcoin
 ICLN,iShares Global Clean Energy ETF,Thematic Equity,Clean Energy
+ICOP,iShares Copper and Metals Mining ETF,Commodities & Hard Assets,Copper & Metals Mining
 ICVT,iShares Convertible Bond ETF,Fixed Income & Cash,Convertible Bonds
 IGV,iShares Expanded Tech-Software Sector ETF,Thematic Equity,Software
 IHI,iShares U.S. Medical Devices ETF,US Equity,Medical Devices
 INDA,iShares MSCI India ETF,International Equity,Single Country: India
 IXC,iShares Global Energy ETF,Commodities & Hard Assets,Global Energy
 IXN,iShares Global Tech ETF,Thematic Equity,Global Technology
+JAAA,Janus Henderson AAA CLO ETF,Fixed Income & Cash,AAA CLOs
 JEPI,JPMorgan Equity Premium Income ETF,US Equity,US Equity Premium Income
 JEPQ,JPMorgan Nasdaq Equity Premium Income ETF,US Equity,Nasdaq Equity Premium Income
 JETS,US Global Jets ETF,US Equity,Airlines
@@ -91,16 +105,17 @@ JMOM,JPMorgan US Momentum Factor ETF,US Equity,Momentum
 JPST,JPMorgan Ultra-Short Income ETF,Fixed Income & Cash,Ultra-Short Income / Cash Equivalent
 JQUA,JPMorgan US Quality Factor ETF,US Equity,Quality
 KBE,State Street SPDR S&P Bank ETF,US Equity,Banks
-KCE,State Street SPDR S&P Capital Markets ETF,US Equity,Capital Markets
 KIE,State Street SPDR S&P Insurance ETF,US Equity,Insurance
 KOMP,State Street SPDR S&P Kensho New Economies Composite ETF,Thematic Equity,New Economy / Innovation
 KSA,iShares MSCI Saudi Arabia ETF,International Equity,Single Country: Saudi Arabia
 LIT,Global X Lithium & Battery Tech ETF,Thematic Equity,Lithium & Battery Technology
 LQD,iShares iBoxx USD Investment Grade Corporate Bond ETF,Fixed Income & Cash,Investment Grade Corporate Bonds
+MAGS,Roundhill Magnificent Seven ETF,US Equity,Magnificent Seven
 MCHI,iShares MSCI China ETF,International Equity,Single Country: China
-MGC,Vanguard Mega Cap ETF,US Equity,Mega Cap
+MGC,Vanguard Morningstar Mega Cap ETF,US Equity,Mega Cap
 MLPA,Global X MLP ETF,Commodities & Hard Assets,MLP / Energy Infrastructure
 MOAT,VanEck Morningstar Wide Moat ETF,US Equity,Wide Moat
+NLR,VanEck Uranium and Nuclear ETF,Commodities & Hard Assets,Uranium & Nuclear Energy
 NYF,iShares New York Muni Bond ETF,Fixed Income & Cash,New York Muni Bonds
 OIH,VanEck Oil Services ETF,Commodities & Hard Assets,Energy Services
 PAVE,Global X US Infrastructure Development ETF,US Equity,Infrastructure
@@ -111,11 +126,14 @@ PICK,iShares MSCI Global Metals & Mining Producers ETF,Commodities & Hard Assets
 PKW,Invesco BuyBack Achievers ETF,US Equity,Buyback Achievers
 PULS,PGIM Ultra Short Bond ETF,Fixed Income & Cash,Ultra-Short Income / Cash Equivalent
 QCLN,First Trust NASDAQ Clean Edge Green Energy Index Fund,Thematic Equity,Clean Energy
+QQQI,NEOS Nasdaq-100 High Income ETF,US Equity,Nasdaq 100 High Income
 QQQJ,Invesco Nasdaq Next Gen 100 ETF,US Equity,Nasdaq Next Gen 100
 QQQM,Invesco Nasdaq 100 ETF,US Equity,Nasdaq 100
 QTEC,First Trust NASDAQ-100 Technology Index Fund,US Equity,Nasdaq Technology
+QTUM,Defiance Quantum ETF,Thematic Equity,Quantum Computing
 QYLD,Global X Nasdaq 100 Covered Call ETF,US Equity,Nasdaq Covered Call
 REM,iShares Mortgage Real Estate ETF,Real Estate,Mortgage REITs
+REMX,VanEck Rare Earth and Strategic Metals ETF,Commodities & Hard Assets,Rare Earth & Strategic Metals
 RSP,Invesco S&P 500 Equal Weight ETF,US Equity,S&P 500 Equal Weight
 RYLD,Global X Russell 2000 Covered Call ETF,US Equity,Russell 2000 Covered Call
 SCHA,Schwab US Small-Cap ETF,US Equity,US Small Cap
@@ -124,6 +142,7 @@ SCHP,Schwab US TIPS ETF,Fixed Income & Cash,TIPS
 SCZ,iShares MSCI EAFE Small-Cap ETF,International Equity,EAFE Small Cap
 SDIV,Global X SuperDividend ETF,US Equity,Global High Dividend
 SGOV,iShares 0-3 Month Treasury Bond ETF,Fixed Income & Cash,T-Bills / Cash Equivalent
+SHLD,Global X Defense Tech ETF,Thematic Equity,Defense Technology
 SHV,iShares 0-1 Year Treasury Bond ETF,Fixed Income & Cash,T-Bills / Cash Equivalent
 SHYG,iShares 0-5 Year High Yield Corporate Bond ETF,Fixed Income & Cash,Short-Term High Yield Bonds
 SLV,iShares Silver Trust,Commodities & Hard Assets,Silver Bullion
@@ -132,6 +151,7 @@ SMH,VanEck Semiconductor ETF,US Equity,Semiconductors
 SMIN,iShares MSCI India Small-Cap ETF,International Equity,Single Country: India Small Cap
 SPY,State Street SPDR S&P 500 ETF Trust,US Equity,S&P 500
 SPYD,State Street SPDR Portfolio S&P 500 High Dividend ETF,US Equity,S&P 500 High Dividend
+SPYI,NEOS S&P 500 High Income ETF,US Equity,S&P 500 High Income
 SPYX,State Street SPDR S&P 500 Fossil Fuel Reserves Free ETF,US Equity,S&P 500 Fossil Fuel Reserves Free
 SUB,iShares Short-Term National Muni Bond ETF,Fixed Income & Cash,Short-Term National Muni Bonds
 SUSB,iShares ESG Aware 1-5 Year USD Corporate Bond ETF,Fixed Income & Cash,Short-Term Corporate Bonds ESG
@@ -146,8 +166,8 @@ URA,Global X Uranium ETF,Commodities & Hard Assets,Uranium
 USFR,WisdomTree Floating Rate Treasury Fund,Fixed Income & Cash,Floating Rate Treasury / Cash Equivalent
 USHY,iShares Broad USD High Yield Corporate Bond ETF,Fixed Income & Cash,High Yield Bonds
 USMV,iShares MSCI USA Min Vol Factor ETF,Defensive Equity,Minimum Volatility
-VBK,Vanguard Small-Cap Growth ETF,US Equity,Small Cap Growth
-VBR,Vanguard Small-Cap Value ETF,US Equity,Small Cap Value
+VBK,Vanguard Morningstar Small-Cap Growth ETF,US Equity,Small Cap Growth
+VBR,Vanguard Morningstar Small-Cap Value ETF,US Equity,Small Cap Value
 VCLT,Vanguard Long-Term Corporate Bond ETF,Fixed Income & Cash,Long-Term Corporate Bonds
 VCSH,Vanguard Short-Term Corporate Bond ETF,Fixed Income & Cash,Short-Term Corporate Bonds
 VEA,Vanguard FTSE Developed Markets ETF,International Equity,Developed Markets
@@ -159,16 +179,16 @@ VIGI,Vanguard International Dividend Appreciation ETF,International Equity,Inter
 VMBS,Vanguard Mortgage-Backed Securities ETF,Fixed Income & Cash,Mortgage-Backed Bonds
 VNQ,Vanguard Real Estate ETF,Real Estate,US Real Estate
 VNQI,Vanguard Global ex-U.S. Real Estate ETF,Real Estate,International Real Estate
-VO,Vanguard Mid-Cap ETF,US Equity,Mid Cap
-VOE,Vanguard Mid-Cap Value ETF,US Equity,Mid Cap Value
-VOT,Vanguard Mid-Cap Growth ETF,US Equity,Mid Cap Growth
+VO,Vanguard Morningstar Mid-Cap ETF,US Equity,Mid Cap
+VOE,Vanguard Morningstar Mid-Cap Value ETF,US Equity,Mid Cap Value
+VOT,Vanguard Morningstar Mid-Cap Growth ETF,US Equity,Mid Cap Growth
 VPL,Vanguard FTSE Pacific ETF,International Equity,Pacific
 VSGX,Vanguard ESG International Stock ETF,International Equity,International ESG
 VT,Vanguard Total World Stock ETF,International Equity,Global Equity
 VTEB,Vanguard Tax-Exempt Bond Index ETF,Fixed Income & Cash,Tax-Exempt Muni Bonds
-VTI,Vanguard Total Stock Market ETF,US Equity,Total US Stock Market
-VTV,Vanguard Value ETF,US Equity,Value
-VUG,Vanguard Growth ETF,US Equity,Growth
+VTI,Vanguard Morningstar Total Stock Market ETF,US Equity,Total US Stock Market
+VTV,Vanguard Morningstar Value ETF,US Equity,Value
+VUG,Vanguard Morningstar Growth ETF,US Equity,Growth
 VWO,Vanguard FTSE Emerging Markets ETF,International Equity,Emerging Markets
 VWOB,Vanguard Emerging Markets Government Bond ETF,Fixed Income & Cash,Emerging Markets Government Bonds
 VXUS,Vanguard Total International Stock ETF,International Equity,Total International Stock
