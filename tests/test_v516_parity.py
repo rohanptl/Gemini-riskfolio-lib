@@ -19,11 +19,11 @@ class V516ParityRegressionTests(unittest.TestCase):
         path = BASELINE_DIR / "final_target_weights_tradeable.csv"
         df = pd.read_csv(path)
 
-        self.assertEqual(list(df.columns), ["Ticker", "Weight"])
-        self.assertFalse(df["Ticker"].duplicated().any())
-        self.assertIn("SGOV", set(df["Ticker"]))
+        self.assertEqual(list(df.columns), ["Unnamed: 0", "Weight"])
+        self.assertFalse(df["Unnamed: 0"].duplicated().any())
+        self.assertIn("SGOV", set(df["Unnamed: 0"]))
 
-        weights = df.set_index("Ticker")["Weight"].astype(float)
+        weights = df.set_index("Unnamed: 0")["Weight"].astype(float)
         self.assertAlmostEqual(float(weights.sum()), 1.0, places=12)
 
         pct = weights * 100.0
