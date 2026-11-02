@@ -12,3 +12,7 @@ __pycache__/
 
 __pycache__/
 *.py[cod]
+
+# V5.16 parameter experiments / comparison outputs
+outputs_v516_*/
+comparison_*/
