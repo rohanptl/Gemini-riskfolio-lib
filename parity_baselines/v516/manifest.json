@@ -1,10 +1,16 @@
 {
   "file_tolerances": {
-    "final_target_weights_tradeable.csv": 1e-9
+    "benchmark_comparison.csv": 5e-06,
+    "final_target_weights_tradeable.csv": 1e-09,
+    "risk_overlay_summary_by_rebalance.csv": 5e-06,
+    "turnover_by_rebalance.csv": 5e-06
   },
   "format_version": 1,
   "frozen_files": [
-    "final_target_weights_tradeable.csv"
+    "final_target_weights_tradeable.csv",
+    "benchmark_comparison.csv",
+    "turnover_by_rebalance.csv",
+    "risk_overlay_summary_by_rebalance.csv"
   ],
   "production_snapshot": {
     "enabled_risk_override_plugins": [
@@ -23,10 +29,7 @@
     "whole_percent_step_percent": 1
   },
   "purpose": "Frozen regression fixture for implementation/parity validation; not a parameter-optimization baseline.",
-  "reference_commit": "7a6ee5c3f7912e7f883e34047fef167d12bbfae2",
-  "source_note": "Post-promotion manual V5.16 run using the 214-ETF Wealthfront universe and whole-percent execution.",
+  "reference_commit": "d7d7ff706fc41c536f33fcd44fb6b033e77d563a",
   "source_signal_date": "2026-10-30",
-  "strategy": "V5.16",
-  "source_branch": "cleanup/remove-legacy-strategy-snapshots",
-  "source_locked_at_utc": "2026-11-02T03:56:03.572425+00:00"
+  "strategy": "V5.16"
 }
