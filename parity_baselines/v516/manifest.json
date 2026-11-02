@@ -1,0 +1,35 @@
+{
+  "file_tolerances": {
+    "benchmark_comparison.csv": 5e-06,
+    "final_target_weights_tradeable.csv": 1e-09,
+    "risk_overlay_summary_by_rebalance.csv": 5e-06,
+    "turnover_by_rebalance.csv": 5e-06
+  },
+  "format_version": 1,
+  "frozen_files": [
+    "final_target_weights_tradeable.csv",
+    "benchmark_comparison.csv",
+    "turnover_by_rebalance.csv",
+    "risk_overlay_summary_by_rebalance.csv"
+  ],
+  "production_snapshot": {
+    "enabled_risk_override_plugins": [
+      "stale_position"
+    ],
+    "enabled_target_plugins": [
+      "stale_position",
+      "correlation_control"
+    ],
+    "max_risk_asset_weight": 0.18,
+    "max_turnover_per_rebalance": 0.2,
+    "min_whole_percent_noncash": 1,
+    "tradeable_min_weight": 0.01,
+    "universe_git_blob_sha": "26b8b3794e0f35a6a39ec39af21fe686387281d5",
+    "use_whole_percent_final_weights": true,
+    "whole_percent_step_percent": 1
+  },
+  "purpose": "Frozen regression fixture for implementation/parity validation; not a parameter-optimization baseline.",
+  "reference_commit": "d7d7ff706fc41c536f33fcd44fb6b033e77d563a",
+  "source_signal_date": "2026-10-30",
+  "strategy": "V5.16"
+}

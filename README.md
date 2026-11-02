@@ -79,6 +79,35 @@ outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/final_allocati
 outputs_option2_v5_16_score_tilted_cvar/allocation_explanation_reports/
 ```
 
+## Implementation parity regression
+
+V5.16 production behavior is protected by a frozen regression fixture under
+`parity_baselines/v516/`. This is for implementation/parity validation only;
+it is not an optimization target.
+
+After running V5.16 for the frozen signal date, compare the 2023 window with
+the committed baseline:
+
+```powershell
+python verify_v516_plugin_parity.py --modular-dir outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023
+```
+
+The verifier first checks that the ETF universe and pinned production settings
+still match the fixture manifest. It then compares every CSV declared frozen in
+the manifest using strict file-specific tolerances.
+
+The baseline must not be refreshed merely because a parity check fails. If a
+future implementation change is intentionally accepted and independently
+validated, freeze the complete comparison set from that validated output:
+
+```powershell
+python verify_v516_plugin_parity.py --freeze-baseline-from outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023 --source-signal-date YYYY-MM-DD --force
+```
+
+Then review the fixture diff before committing it. A baseline change is an
+explicit production-behavior change and should never be hidden inside a normal
+refactor.
+
 ## Rollback and experiment commands
 
 Each command writes to a separate directory so it does not overwrite the
