@@ -5,7 +5,7 @@ explain_v516_allocation.py
 Generate a plain-English allocation explanation report from V5.16 backtest outputs.
 
 Run after:
-    python main_option2_all_etfs_v5_16_score_tilted_cvar_production.py
+    python main_option2_all_etfs_v5_16_risk_overlay_v3.py
 
 Example:
     python explain_v516_allocation.py \
