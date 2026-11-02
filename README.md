@@ -52,13 +52,13 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 Short command using the production defaults:
 
 ```powershell
-python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto
+python main_option2_all_etfs_v5_16_risk_overlay_v3.py --end-date auto
 ```
 
 Fully pinned command matching GitHub Actions:
 
 ```powershell
-python main_option2_all_etfs_v5_16_rolling_asof_monthly_attribution_dynamic_enddate.py --end-date auto --rebalance-mode rolling_asof_monthly --sma50-eligibility hard --mom63-eligibility hard --short-momentum-score mom126_skip21 --relative-strength-score none --volatility-score total63 --output-dir outputs_option2_v5_16_score_tilted_cvar
+python main_option2_all_etfs_v5_16_risk_overlay_v3.py --end-date auto --rebalance-mode rolling_asof_monthly --sma50-eligibility hard --mom63-eligibility hard --short-momentum-score mom126_skip21 --relative-strength-score none --volatility-score total63 --output-dir outputs_option2_v5_16_score_tilted_cvar
 ```
 
 ### 3. Generate the allocation explanation package
@@ -623,7 +623,7 @@ Then it chooses roughly:
 ```text
 Minimum selected ETFs: 10
 Maximum selected ETFs: 15
-Max individual risk ETF weight: 12%
+Max individual risk ETF weight: 18%
 ```
 
 ---
@@ -693,11 +693,11 @@ flowchart TD
 
     F --> G[Raw optimized weights]
     G --> H[Normalize weights]
-    H --> I[Apply max 12% per ETF cap]
+    H --> I[Apply max 18% per ETF cap]
     I --> J[Base CVaR risk weights]
 
     J --> K[Apply score-rank tilt]
-    K --> L[Re-apply 12% cap]
+    K --> L[Re-apply 18% cap]
     L --> M[Final risk-sleeve weights]
 ```
 
@@ -711,7 +711,7 @@ rm = "CVaR"
 obj = "Sharpe"
 method_mu = "hist"
 method_cov = "ledoit"
-upperlng = 0.12
+upperlng = 0.18
 ```
 
 Meaning:
@@ -723,7 +723,7 @@ Sharpe objective
 Historical mean returns
 Ledoit covariance shrinkage
 No shorting
-Max 12% per ETF
+Max 18% per ETF
 ```
 
 ## Important note
@@ -753,7 +753,7 @@ flowchart TD
     E --> F[Clip multiplier between 0.70 and 1.30]
     F --> G[Multiply CVaR weights by tilt multiplier]
     G --> H[Normalize to 100% risk sleeve]
-    H --> I[Apply 12% max cap again]
+    H --> I[Apply 18% max cap again]
     I --> J[Score-tilted CVaR weights]
 ```
 
@@ -847,7 +847,9 @@ flowchart TD
     H --> I[Remove sub-2% stale positions]
     I --> J[Limit to max 15 non-cash holdings]
     J --> K[Redistribute remaining weights]
-    K --> L[Final monthly allocation]
+    K --> L[Quantize surviving holdings to whole percentage points]
+    L --> M[SGOV absorbs rounding residual]
+    M --> N[Final monthly allocation]
 ```
 
 ## Turnover formula
@@ -877,6 +879,18 @@ Redistribute weight to the remaining names
 ```
 
 This keeps the final allocation tradable.
+
+Production then converts the surviving portfolio to whole percentage points:
+
+```text
+Every surviving non-cash holding remains at least 1%
+Every risk ETF remains at or below the 18% cap
+SGOV absorbs the residual so final weights sum to exactly 100%
+```
+
+The rounded portfolio is the actual portfolio used for the following month's
+backtest path and therefore also becomes the previous portfolio for the next
+turnover-controlled rebalance.
 
 ---
 

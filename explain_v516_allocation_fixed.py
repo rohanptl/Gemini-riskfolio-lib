@@ -750,7 +750,13 @@ def write_outputs(
             "Exact score-tilt multipliers are not saved in V5.16 outputs.",
             "Exact pre-cash, post-cash, pre-turnover, and post-turnover ticker-level attribution is not saved in V5.16 outputs.",
         ],
-        "final_holdings": explanation[["Ticker", "FinalWeight", "SelectionBucket", "PlainEnglishExplanation"]].to_dict(orient="records"),
+        "final_holdings": explanation[[
+            "Ticker",
+            "FinalWeight",
+            "FinalWeightPct",
+            "SelectionBucket",
+            "PlainEnglishExplanation",
+        ]].to_dict(orient="records"),
     }
     json_path.write_text(json.dumps(snapshot, indent=2, default=str), encoding="utf-8")
 

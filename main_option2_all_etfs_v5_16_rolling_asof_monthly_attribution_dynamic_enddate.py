@@ -17,9 +17,8 @@ import matplotlib.pyplot as plt
 # This does not affect optimization results.
 warnings.filterwarnings(
     "ignore",
-    message=r".*This use of ``\*`` has resulted in matrix multiplication.*",
+    message=r"\s*This use of ``\*`` has resulted in matrix multiplication\.",
     category=UserWarning,
-    module=r"cvxpy\.expressions\.expression",
 )
 
 # ============================================================
@@ -79,16 +78,17 @@ DAILY_RF = ANNUAL_RF / TRADING_DAYS
 # OPTION 2: FILTER WINNERS FIRST, THEN OPTIMIZE
 # ------------------------------------------------------------
 
-# Wider winner basket + lower cap gives Riskfolio room to size positions.
-# This reduces the previous "five assets at 20% each" forced equal-weight behavior.
+# Winner basket sizing. The production cap was raised from 12% to 18% after
+# walk-forward robustness tests across neighboring 13%-20% caps. The 18% cap
+# improved CAGR/Sharpe without materially increasing turnover.
 MIN_ELIGIBLE_ASSETS = 10
 MAX_ELIGIBLE_ASSETS = 15
-MAX_RISK_ASSET_WEIGHT = 0.12
+MAX_RISK_ASSET_WEIGHT = 0.18
 
 # Remove tiny optimizer dust.
 MIN_WEIGHT_TO_KEEP = 0.01
 MIN_PRINT_WEIGHT = 0.001  # raw output threshold
-TRADEABLE_MIN_WEIGHT = 0.02  # cleaner display threshold
+TRADEABLE_MIN_WEIGHT = 0.01  # whole-percent production can retain a 1% holding
 
 # Eligibility filters.
 REQUIRE_PRICE_ABOVE_SMA_50 = True
@@ -171,6 +171,14 @@ MAX_TURNOVER_PER_REBALANCE = 0.20
 PRUNE_TINY_POSITIONS_AFTER_TURNOVER = True
 MIN_POSITION_WEIGHT_AFTER_REBALANCE = 0.02
 MAX_FINAL_HOLDINGS_AFTER_PRUNE = 15
+
+# Production execution rule validated against exact-weight V5.16:
+# after turnover control + cleanup, convert the final portfolio to whole
+# percentage points. Every surviving non-cash holding remains at least 1%;
+# SGOV absorbs the residual required to sum to exactly 100%.
+USE_WHOLE_PERCENT_FINAL_WEIGHTS = True
+WHOLE_PERCENT_STEP_PERCENT = 1
+MIN_WHOLE_PERCENT_NONCASH = 1
 
 # Keep explicit cash-like ETFs out of the active risk sleeve.
 # They are controlled by the SGOV/cash sleeve instead.
@@ -1046,6 +1054,137 @@ def prune_tiny_positions_after_turnover(
         cleaned = cleaned / cleaned.sum()
 
     return cleaned
+
+
+def quantize_whole_percent_weights(
+    weights: pd.Series,
+    min_non_cash_percent: int = MIN_WHOLE_PERCENT_NONCASH,
+    step_percent: int = WHOLE_PERCENT_STEP_PERCENT,
+) -> pd.Series:
+    """
+    Convert the post-prune portfolio to whole percentage points.
+
+    Production behavior:
+    - Every surviving non-cash position remains present.
+    - Every non-cash weight is a whole percentage point and at least 1%.
+    - No non-cash position exceeds MAX_RISK_ASSET_WEIGHT.
+    - SGOV absorbs the residual so the portfolio sums to exactly 100%.
+
+    The allocation is the feasible whole-percent portfolio minimizing squared
+    percentage-point deviation from the post-prune V5.16 weights.
+    """
+    if not USE_WHOLE_PERCENT_FINAL_WEIGHTS:
+        return weights
+
+    w = (
+        weights.copy()
+        .astype(float)
+        .replace([np.inf, -np.inf], np.nan)
+        .fillna(0.0)
+        .clip(lower=0.0)
+    )
+
+    total = float(w.sum())
+    if total <= 0:
+        return w
+    w = w / total
+
+    if step_percent <= 0:
+        raise ValueError("WHOLE_PERCENT_STEP_PERCENT must be positive.")
+    if min_non_cash_percent <= 0:
+        raise ValueError("MIN_WHOLE_PERCENT_NONCASH must be positive.")
+
+    cash_raw_pct = 100.0 * float(w.get(CASH_TICKER, 0.0))
+    max_risk_pct = int(round(float(MAX_RISK_ASSET_WEIGHT) * 100.0))
+    max_risk_pct = max(min_non_cash_percent, max_risk_pct)
+
+    risk_assets = [
+        ticker
+        for ticker, weight in w.items()
+        if ticker != CASH_TICKER and float(weight) > 1e-12
+    ]
+
+    allowed_risk_weights = list(
+        range(min_non_cash_percent, max_risk_pct + 1, step_percent)
+    )
+
+    # state[risk_total_pct] = (squared_error_cost, allocation_dict)
+    states: dict[int, tuple[float, dict[str, int]]] = {0: (0.0, {})}
+
+    for ticker in risk_assets:
+        raw_pct = 100.0 * float(w[ticker])
+        next_states: dict[int, tuple[float, dict[str, int]]] = {}
+
+        for running_total, (running_cost, allocation) in states.items():
+            for integer_pct in allowed_risk_weights:
+                new_total = running_total + integer_pct
+                if new_total > 100:
+                    continue
+
+                new_cost = running_cost + (integer_pct - raw_pct) ** 2
+                current_best = next_states.get(new_total)
+
+                if current_best is None or new_cost < current_best[0]:
+                    new_allocation = dict(allocation)
+                    new_allocation[ticker] = integer_pct
+                    next_states[new_total] = (new_cost, new_allocation)
+
+        states = next_states
+
+    best: tuple[float, int, dict[str, int]] | None = None
+
+    for risk_total_pct, (risk_cost, allocation) in states.items():
+        cash_pct = 100 - risk_total_pct
+        total_cost = risk_cost + (cash_pct - cash_raw_pct) ** 2
+
+        candidate = (total_cost, cash_pct, allocation)
+        if best is None or candidate[0] < best[0]:
+            best = candidate
+
+    if best is None:
+        raise RuntimeError("Could not construct whole-percent portfolio.")
+
+    _, cash_pct, allocation = best
+    result = pd.Series(0.0, index=w.index, dtype=float)
+
+    for ticker, integer_pct in allocation.items():
+        result.loc[ticker] = integer_pct / 100.0
+
+    if CASH_TICKER in result.index:
+        result.loc[CASH_TICKER] = cash_pct / 100.0
+    elif cash_pct:
+        raise RuntimeError(
+            f"Whole-percent allocation requires residual cash but "
+            f"{CASH_TICKER} is not present in the portfolio index."
+        )
+
+    result = result / float(result.sum())
+
+    rounded_pct = result * 100.0
+    if abs(float(result.sum()) - 1.0) > 1e-10:
+        raise AssertionError("Whole-percent portfolio does not sum to 100%.")
+
+    for ticker, pct_value in rounded_pct.items():
+        if abs(float(pct_value) - round(float(pct_value))) > 1e-9:
+            raise AssertionError(
+                f"{ticker} is not a whole-percent weight: {pct_value}"
+            )
+
+        if (
+            ticker != CASH_TICKER
+            and pct_value > 1e-9
+            and pct_value < min_non_cash_percent - 1e-9
+        ):
+            raise AssertionError(
+                f"{ticker} violates minimum whole-percent weight: {pct_value}"
+            )
+
+        if ticker != CASH_TICKER and pct_value > max_risk_pct + 1e-9:
+            raise AssertionError(
+                f"{ticker} exceeds max risk weight: {pct_value}%"
+            )
+
+    return result
 
 
 def calculate_turnover(
@@ -2540,7 +2679,17 @@ def run_backtest_for_start_window(
             all_assets=final_assets,
         )
 
-        final_weights = prune_tiny_positions_after_turnover(weights_after_turnover_cap)
+        pruned_weights = prune_tiny_positions_after_turnover(
+            weights_after_turnover_cap
+        )
+
+        turnover_after_prune_before_rounding = calculate_turnover(
+            previous_weights=previous_weights,
+            current_weights=pruned_weights,
+            all_assets=final_assets,
+        )
+
+        final_weights = quantize_whole_percent_weights(pruned_weights)
 
         turnover = calculate_turnover(
             previous_weights=previous_weights,
@@ -2602,7 +2751,15 @@ def run_backtest_for_start_window(
                 "StartWindow": start_date,
                 "Turnover": turnover,
                 "TurnoverBeforePrune": turnover_before_prune,
-                "ExtraTurnoverFromPrune": max(0.0, turnover - turnover_before_prune),
+                "TurnoverAfterPruneBeforeRounding": turnover_after_prune_before_rounding,
+                "ExtraTurnoverFromPrune": max(
+                    0.0,
+                    turnover_after_prune_before_rounding - turnover_before_prune,
+                ),
+                "ExtraTurnoverFromWholePercentRounding": max(
+                    0.0,
+                    turnover - turnover_after_prune_before_rounding,
+                ),
                 "SignalBreadth": signal_breadth,
                 "CashWeight": cash_weight,
                 "BreadthCashWeight": breadth_cash_weight,
@@ -3104,6 +3261,11 @@ def main() -> None:
     print(f"Latest as-of final rebalance enabled: {INCLUDE_LATEST_ASOF_REBALANCE}")
     print(f"V5.14 correlation mode: {CORRELATION_MODE}; fast={FAST_CORR_LOOKBACK_DAYS}d, slow={SLOW_CORR_LOOKBACK_DAYS}d")
     print(f"V5.16 score tilt: enabled={USE_SCORE_TILTED_CVAR}, strength={SCORE_TILT_STRENGTH}")
+    print(f"Max individual risk ETF weight: {MAX_RISK_ASSET_WEIGHT:.0%}")
+    print(
+        "Whole-percent final allocation: "
+        f"{'enabled' if USE_WHOLE_PERCENT_FINAL_WEIGHTS else 'disabled'}"
+    )
     print(
         "SMA50 eligibility: "
         f"{'hard filter + score' if REQUIRE_PRICE_ABOVE_SMA_50 else 'score only'}"
