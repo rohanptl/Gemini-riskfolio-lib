@@ -25,6 +25,8 @@ concurrency:
 jobs:
   run-v516-allocation:
     runs-on: ubuntu-latest
+    outputs:
+      site_ready: ${{ steps.target_guard.outputs.should_run }}
 
     steps:
       - name: Checkout repository
@@ -174,7 +176,7 @@ jobs:
 
 
   deploy-v516-strategy-site:
-    if: vars.V516_ENABLE_PAGES == 'true'
+    if: vars.V516_ENABLE_PAGES == 'true' && needs.run-v516-allocation.outputs.site_ready == 'true'
     needs: run-v516-allocation
     runs-on: ubuntu-latest
     environment:
