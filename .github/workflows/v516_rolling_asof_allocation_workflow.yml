@@ -15,6 +15,8 @@ on:
 permissions:
   contents: write
   actions: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: v516-rolling-asof-allocation
@@ -112,6 +114,22 @@ jobs:
             --source-artifact "v516-rolling-asof-${{ steps.latest_rebalance.outputs.latest_rebalance_date }}-${{ github.run_number }}" \
             "${EXTRA_ARGS[@]}"
 
+      - name: Generate V5.16 strategy evidence packet
+        if: steps.target_guard.outputs.should_run == 'true'
+        run: |
+          python generate_v516_strategy_site.py \
+            --output-dir outputs_option2_v5_16_score_tilted_cvar \
+            --window 2023 \
+            --site-dir site/v516 \
+            --parity-baseline-dir parity_baselines/v516 \
+            --live-target-dir live_targets/v516
+
+      - name: Stage strategy site for GitHub Pages
+        if: steps.target_guard.outputs.should_run == 'true' && vars.V516_ENABLE_PAGES == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/v516
+
       - name: Upload allocation artifacts
         if: steps.target_guard.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
@@ -134,6 +152,7 @@ jobs:
             outputs_option2_v5_16_score_tilted_cvar/walk_forward_windows/2023/benchmark_comparison.csv
             outputs_option2_v5_16_score_tilted_cvar/allocation_explanation_reports/
             live_targets/v516/
+            site/v516/
           if-no-files-found: warn
           retention-days: 90
 
@@ -152,3 +171,19 @@ jobs:
             git pull --rebase
             git push
           fi
+
+
+  deploy-v516-strategy-site:
+    if: vars.V516_ENABLE_PAGES == 'true'
+    needs: run-v516-allocation
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy V5.16 strategy site to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
