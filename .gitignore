@@ -16,3 +16,4 @@ __pycache__/
 # V5.16 parameter experiments / comparison outputs
 outputs_v516_*/
 comparison_*/
+\n# Generated V5.16 strategy evidence site.\nsite/v516/\n
