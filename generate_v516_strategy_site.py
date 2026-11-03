@@ -24,6 +24,7 @@ DEFAULT_OUTPUT_DIR = Path("outputs_option2_v5_16_score_tilted_cvar")
 DEFAULT_SITE_DIR = Path("site/v516")
 DEFAULT_PARITY_DIR = Path("parity_baselines/v516")
 DEFAULT_LIVE_TARGET_DIR = Path("live_targets/v516")
+DEFAULT_UNIVERSE_FILE = Path("Wealthfront_ETF_Categorization.csv")
 
 
 def read_csv(path: Path, index_col: int | None = None) -> pd.DataFrame:
@@ -522,6 +523,7 @@ def build_site(
     site_dir: Path = DEFAULT_SITE_DIR,
     parity_dir: Path = DEFAULT_PARITY_DIR,
     live_target_dir: Path = DEFAULT_LIVE_TARGET_DIR,
+    universe_file: Path = DEFAULT_UNIVERSE_FILE,
 ) -> Path:
     window_dir = output_dir / "walk_forward_windows" / window
     if not window_dir.exists():
@@ -682,8 +684,20 @@ def build_site(
         {},
     )
 
+    universe = read_csv(universe_file)
+    universe_count = (
+        int(universe["Ticker"].dropna().astype(str).nunique())
+        if "Ticker" in universe.columns
+        else None
+    )
+    universe_label = (
+        f"{universe_count} Wealthfront ETFs"
+        if universe_count is not None
+        else "Wealthfront ETF universe"
+    )
+
     run_setup = [
-        ("Universe", "214 Wealthfront ETFs"),
+        ("Universe", universe_label),
         ("Window", window),
         (
             "Signal date",
@@ -1150,6 +1164,10 @@ def main() -> None:
         "--live-target-dir",
         default=str(DEFAULT_LIVE_TARGET_DIR),
     )
+    parser.add_argument(
+        "--universe-file",
+        default=str(DEFAULT_UNIVERSE_FILE),
+    )
     args = parser.parse_args()
 
     path = build_site(
@@ -1158,6 +1176,7 @@ def main() -> None:
         site_dir=Path(args.site_dir),
         parity_dir=Path(args.parity_baseline_dir),
         live_target_dir=Path(args.live_target_dir),
+        universe_file=Path(args.universe_file),
     )
     print(f"V5.16 strategy site generated: {path}")
 
