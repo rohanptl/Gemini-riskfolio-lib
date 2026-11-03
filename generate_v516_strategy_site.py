@@ -1120,6 +1120,7 @@ model outputs; not an investment recommendation.
 
     index_path = site_dir / "index.html"
     index_path.write_text(page, encoding="utf-8")
+    (site_dir / ".nojekyll").write_text("", encoding="utf-8")
     return index_path
 
 
