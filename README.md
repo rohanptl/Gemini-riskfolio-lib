@@ -108,6 +108,47 @@ Then review the fixture diff before committing it. A baseline change is an
 explicit production-behavior change and should never be hidden inside a normal
 refactor.
 
+## V5.16 strategy evidence site
+
+The production outputs can be rendered as a static evidence packet similar to
+a hosted backtest report. The page is generated entirely from existing V5.16
+CSV/JSON/PNG outputs; it does not change strategy logic or rerun optimization.
+
+Generate it locally after the production run and allocation explanation:
+
+```powershell
+python generate_v516_strategy_site.py --output-dir outputs_option2_v5_16_score_tilted_cvar --window 2023 --site-dir site/v516
+```
+
+Open `site/v516/index.html` in a browser. The packet includes:
+
+- run setup and production controls
+- CAGR, Sharpe, drawdown, total return, volatility and Sortino cards
+- current target weights with selection explanations
+- cumulative performance, drawdown, weight history, turnover, cash/breadth,
+  monthly-return and final-correlation charts
+- benchmark and walk-forward tables
+- current regression/parity status
+- copied run artifacts and a machine-readable `strategy_snapshot.json`
+
+The monthly production workflow also generates `site/v516/` and includes it
+inside the normal 90-day GitHub Actions artifact.
+
+### Optional GitHub Pages publishing
+
+Publishing is intentionally opt-in so Pages configuration cannot break the
+allocation workflow. To enable it:
+
+1. In repository **Settings → Pages**, set the build/deployment source to
+   **GitHub Actions**.
+2. In **Settings → Secrets and variables → Actions → Variables**, create
+   `V516_ENABLE_PAGES` with value `true`.
+3. Run the normal V5.16 monthly workflow (or use its manual dispatch).
+
+When the monthly allocation actually runs, the workflow stages `site/v516/`
+as a Pages artifact and deploys it to the repository's `github-pages`
+environment. Same-month protected/skip runs do not attempt a Pages deployment.
+
 ## Rollback and experiment commands
 
 Each command writes to a separate directory so it does not overwrite the
