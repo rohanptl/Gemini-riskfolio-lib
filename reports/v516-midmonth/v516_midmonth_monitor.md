@@ -1,6 +1,6 @@
 # V5.16 Mid-Month Monitor
 
-**Status: NORMAL_NO_TRADE**
+**Status: REVIEW_DRIFT_NO_TRADE**
 
 **Instruction: NO TRADE. Keep the locked monthly Wealthfront targets.**
 
@@ -8,27 +8,27 @@
 - Source market-close signal date: 2026-10-30
 - Allocation submitted date: not recorded
 - Live effective date: 2026-11-01
-- Latest common price date: 2026-11-13
+- Latest common price date: 2026-11-20
 - Next scheduled rebalance: 2026-12-01
-- Estimated return since lock: -1.27%
-- Current drawdown since lock: -1.00%
-- Maximum drawdown since lock: -2.22%
-- Maximum estimated weight drift: 0.66 percentage points
+- Estimated return since lock: -4.47%
+- Current drawdown since lock: -4.21%
+- Maximum drawdown since lock: -4.21%
+- Maximum estimated weight drift: 2.26 percentage points
 
 ## Largest estimated drifts
 
 | Ticker | Locked target | Estimated weight | Drift (percentage points) |
 |---|---:|---:|---:|
-| SGOV | 45.93% | 46.59% | +0.66 |
-| ARKG | 2.86% | 2.43% | -0.42 |
-| CIBR | 6.00% | 5.72% | -0.28 |
-| XLV | 6.67% | 6.90% | +0.23 |
-| XOP | 2.33% | 2.14% | -0.19 |
-| XLE | 3.05% | 2.86% | -0.18 |
-| WCLD | 3.05% | 2.92% | -0.13 |
-| XLP | 2.73% | 2.85% | +0.13 |
-| XBI | 5.51% | 5.39% | -0.12 |
-| JQUA | 6.77% | 6.88% | +0.11 |
+| SGOV | 45.93% | 48.19% | +2.26 |
+| ARKG | 2.86% | 2.21% | -0.65 |
+| XBI | 5.51% | 5.18% | -0.33 |
+| XOP | 2.33% | 2.02% | -0.32 |
+| CIBR | 6.00% | 5.69% | -0.32 |
+| XLE | 3.05% | 2.76% | -0.29 |
+| WCLD | 3.05% | 2.80% | -0.24 |
+| JQUA | 6.77% | 6.58% | -0.19 |
+| XLP | 2.73% | 2.89% | +0.16 |
+| BKLN | 2.95% | 3.09% | +0.14 |
 
 ## How to use this report
 
